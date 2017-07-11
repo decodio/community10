@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_general_configuration_mail_opt_out" model="ir.ui.view">
+        <field name="model">base.config.settings</field>
+        <field name="inherit_id" ref="base_setup.view_general_configuration"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='email']/.." position='after'>
+                <group>
+                    <label for="default_opt_out"/>
+                    <div name="default_opt_out">
+                        <div>
+                            <field name="default_opt_out"/>
+                        </div>
+                    </div>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
