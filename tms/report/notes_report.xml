@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="header_super_notes">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="panel">
+                        <t t-as="partner_waybills" t-foreach="doc.waybill_ids">
+                            <t t-as="partner_notes" t-foreach="doc.route_id.note_ids">
+                                <t t-set="partner_way" t-value="partner_waybills.partner_id"/>
+                                <t t-set="partner_not" t-value="partner_notes.partner_id"/>
+                                <t t-if="partner_not == partner_way">
+                                    <div class="panel-heading" t-att-style="Panel_Header">
+                                        <p style="margin-top: 4%; text-align:center; font-size:30px; font-family: monospace; font-weight:bold; color:#333 !important; ">LETTER OF INSTRUCTIONS: 
+                                            <span t-field="partner_waybills.partner_id.name"/></p>
+                                    </div>
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    <label>Departure Date:</label>
+                                                </th>
+                                                <th>
+                                                    <span t-field="doc.date_start"/>
+                                                </th>
+                                                <th>
+                                                    <label>Deliver Date:</label>
+                                                </th>
+                                                <th>
+                                                    <span t-field="doc.travel_duration"/>Hrs</th>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <label>Waybill:</label>
+                                                </th>
+                                                <th>
+                                                    <span t-field="partner_waybills.name"/>
+                                                </th>
+                                                <th>
+                                                    <label>Unit:</label>
+                                                </th>
+                                                <th>
+                                                    <span t-field="doc.unit_id"/>
+                                                </th>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <label>Trailer:</label>
+                                                </th>
+                                                <th>
+                                                    <span t-field="doc.trailer1_id"/>
+                                                </th>
+                                                <th>
+                                                    <label>Driver:</label>
+                                                </th>
+                                                <th>
+                                                    <span t-field="doc.employee_id"/>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </t>
+                            </t>
+                        </t>
+                </div>
+            </div>
+        </div>
+    </template>
+    <template id="notes_report">
+        <t t-as="doc" t-foreach="docs">
+            <div class="page">
+                <t t-call="tms.header_super_notes"/>
+                <t t-as="partner_waybills" t-foreach="doc.waybill_ids">
+                    <t t-as="partner_notes" t-foreach="doc.route_id.note_ids">
+                        <t t-set="partner_way" t-value="partner_waybills.partner_id"/>
+                        <t t-set="partner_not" t-value="partner_notes.partner_id"/>
+                        <t t-if="partner_not == partner_way">
+                            <div class="list-group">
+                                <h5 class="list-group-item-heading">
+                                    <strong >Notes: </strong>
+                                </h5>
+                                <div class="list-group-item-text">
+                                    <span t-field="partner_notes.notes"/>
+                                </div>
+                            </div>
+                            <div class="list-group">
+                                <h5 class="list-group-item-heading">
+                                    <strong >Rules: </strong>
+                                </h5>
+                                <div class="list-group-item-text">
+                                    <span t-field="partner_notes.rules"/>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+                </t>
+            </div>
+        <div class="footer text-center">
+                <div class="row">
+                    <div class="col-xs-4 text-center">
+                        <span>Atentamente:</span>
+                        <br/>
+                        <span>TRAFICO NACIONAL</span>
+                    </div>
+                    <div class="col-xs-4 text-center">
+                        <span>Nombre y firma de Recibido:  </span>
+                    </div>
+                    <div class="col-xs-4 text-center">
+                        <span>Unidad: </span>
+                    </div>
+                </div>
+                <br/>
+                <br/>
+                <div class="row">
+                    <div class="col-xs-4 text-center">
+                    </div>
+                    <div class="col-xs-4 text-center">
+                        <span>_____________________________</span>
+                    </div>
+                    <div class="col-xs-4 text-center">
+                        <span>__________________</span>
+                    </div>
+                </div>
+        </div>
+                    </t>
+    </template>
+    <template id="notes_report_translate">
+        <t t-call="report.html_container">
+            <t t-as="doc_id" t-foreach="doc_ids">
+                <t t-raw="translate_doc(doc_id, doc_model, 'partner_id.lang', 'tms.notes_report')"/>
+            </t>
+        </t>
+    </template>
+    <report file="tms.notes_report" id="print_notes_report" model="tms.travel" name="tms.notes_report" report_type="qweb-pdf" string="Letter of Instructions"/>
+    <record id="print_notes_report" model="ir.actions.report.xml">
+        <field name="paperformat_id" ref="tms.paperformat_94_151_tms"/>
+    </record>
+</odoo>

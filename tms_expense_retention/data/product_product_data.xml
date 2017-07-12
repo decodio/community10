@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo noupdate="1">
+    <record id="product_isr" model="product.product">
+        <field name="name">ISR</field>
+        <field name="type">product</field>
+        <field eval="True" name="purchase_ok"/>
+        <field eval="False" name="sale_ok"/>
+    </record>
+    <record id="product_insurance" model="product.product">
+        <field name="name">Insurance</field>
+        <field name="type">product</field>
+        <field eval="True" name="purchase_ok"/>
+        <field eval="False" name="sale_ok"/>
+    </record>
+</odoo>
