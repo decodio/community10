@@ -3,7 +3,6 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from odoo import api, models
-from odoo.modules.registry import Registry
 
 NO_BI_MODELS = [
     'temp.range',
@@ -289,7 +288,6 @@ class IrModel(models.Model):
             self.pool.setup_models(self._cr, partial=(not self.pool.ready))
 
             # signal that registry has changed
-            registry = Registry.new(self._cr.dbname)
-            registry.signal_registry_change()
+            self.pool.signal_registry_change()
 
         return res

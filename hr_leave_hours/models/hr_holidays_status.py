@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016 Onestein (<http://www.onestein.eu>)
+# Copyright 2016-2017 Onestein (<http://www.onestein.eu>)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from odoo import api, fields, models
@@ -91,8 +91,6 @@ class HrHolidaysStatus(models.Model):
         for record in self:
             name = record.name
             if not record.limit:
-                name += ('  (%.1f Left)' % (
-                    record.max_hours-record.hours_taken
-                ))
+                name += ('  (%.1f Left)' % (record.remaining_hours))
             res.append((record.id, name))
         return res
