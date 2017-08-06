@@ -17,31 +17,39 @@
 *
 **********************************************************************************/
 
-odoo.define('muk_preview_attachment.SidebarPreview', function (require) {
+odoo.define('muk_preview_attachment.PreviewHelper', function (require) {
 "use strict";
 
 var core = require('web.core');
 var session = require('web.session');
-var Sidebar = require('web.Sidebar');
 var Model = require("web.Model");
 
-var PreviewHelper = require('muk_preview_attachment.PreviewHelper');
+var PreviewGenerator = require('muk_preview.PreviewGenerator');
+var PreviewDialog = require('muk_preview.PreviewDialog');
 
 var Attachment = new Model('ir.attachment', session.user_context);
 
 var QWeb = core.qweb;
 var _t = core._t;
 
-Sidebar.include({
-    on_attachments_loaded: function(attachments) {
-    	this._super.apply(this, arguments);
-        this.$el.find('.o_sidebar_preview_attachment').click(this.on_attachment_preview);
-    },
-    on_attachment_preview: function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        PreviewHelper.createAttachmentPreview($(e.currentTarget).data('id'));
-    },
+var PreviewHelper = core.Class.extend({
+	createAttachmentPreview: function(id) {
+		Attachment.query(['name', 'url', 'type', 'mimetype', 'extension'])
+		.filter([['id', '=', id]])
+		.first().then(function(attachment) {
+			if(!attachment.url && attachment.type === "binary") {
+				attachment.url = '/web/content/' + attachment.id + '?download=true';
+			}
+			PreviewDialog.createPreviewDialog(self, attachment.url, attachment.mimetype,
+					attachment.extension, attachment.name);
+		});
+	}
 });
+
+PreviewHelper.createAttachmentPreview = function(id) {
+    return new PreviewHelper().createAttachmentPreview(id);
+};
+
+return PreviewHelper;
 
 });

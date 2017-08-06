@@ -17,13 +17,15 @@
 *
 **********************************************************************************/
 
-odoo.define('muk_preview_attachment.SidebarPreview', function (require) {
+odoo.define('muk_preview_attachment.ChatterPreview', function (require) {
 "use strict";
 
 var core = require('web.core');
 var session = require('web.session');
-var Sidebar = require('web.Sidebar');
 var Model = require("web.Model");
+
+var ChatThread = require('mail.ChatThread');
+var Chatter = require('mail.Chatter');
 
 var PreviewHelper = require('muk_preview_attachment.PreviewHelper');
 
@@ -32,15 +34,33 @@ var Attachment = new Model('ir.attachment', session.user_context);
 var QWeb = core.qweb;
 var _t = core._t;
 
-Sidebar.include({
-    on_attachments_loaded: function(attachments) {
-    	this._super.apply(this, arguments);
-        this.$el.find('.o_sidebar_preview_attachment').click(this.on_attachment_preview);
-    },
-    on_attachment_preview: function(e) {
-        e.preventDefault();
+ChatThread.include({
+	init: function() {
+		this._super.apply(this, arguments);
+		this.events = _.extend(this.events, {
+            'click .o_attachment .o_image': 'preview',
+        });
+	},
+    preview: function(e) {
+    	e.preventDefault();
         e.stopPropagation();
-        PreviewHelper.createAttachmentPreview($(e.currentTarget).data('id'));
+        PreviewHelper.createAttachmentPreview($(e.currentTarget)
+         .find('.o_attachment_id ').data('id'));
+    },
+});
+
+Chatter.include({
+	init: function() {
+		this._super.apply(this, arguments);
+		this.events = _.extend(this.events, {
+            'click .o_attachment .o_image': 'preview',
+        });
+	},
+    preview: function(e) {
+    	e.preventDefault();
+        e.stopPropagation();
+        PreviewHelper.createAttachmentPreview($(e.currentTarget)
+         .find('.o_attachment_id ').data('id'));
     },
 });
 
