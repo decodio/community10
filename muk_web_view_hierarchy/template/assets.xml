@@ -17,13 +17,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 -->
 
-<templates>
-	<t t-extend="FieldBinaryFile">
-        <t t-jquery="a.o_form_uri" t-operation="replace">
-	    	<div t-if="widget.get('effective_readonly')">
-		    	<button type="button" class="o_binary_preview" aria-hidden="true"><i class="fa fa-file-text-o"></i></button>
-		    	<a href="javascript:void(0)" class="o_form_uri"/>
-	    	</div>
-        </t>
-    </t>
-</templates>
+<odoo>
+
+<template id="assets_backend" name="muk_dms_assets" inherit_id="web.assets_backend">
+	<xpath expr="//link[last()]" position="after">
+		<link rel="stylesheet" href="/muk_web_view_hierarchy/static/lib/jquery-treetable/css/jquery.treetable.css" />	
+	</xpath>
+	<xpath expr="//script[last()]" position="after">
+		<script type="text/javascript" src="/muk_web_view_hierarchy/static/lib/jquery-treetable/js/jquery.treetable.js" />
+		<script type="text/javascript" src="/muk_web_view_hierarchy/static/src/js/view_hierarchy.js" />
+	</xpath>
+</template>
+
+</odoo>
