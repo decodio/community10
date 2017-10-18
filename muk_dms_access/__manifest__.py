@@ -2,8 +2,6 @@
 
 ###################################################################################
 # 
-#    MuK Document Management System
-#
 #    Copyright (C) 2017 MuK IT GmbH
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -22,10 +20,10 @@
 ###################################################################################
 
 {
-    'name': "MuK Documents Access Control",
+    'name': "MuK Documents Access",
     'summary': """Document Management System""",
     'description': """ 
-        Access Control Extension
+        ABX
     """,
     'version': '10.0.1.0.0',   
     'category': 'Document Management',   
@@ -37,17 +35,19 @@
         "Kerrim Abdelhamed <kerrim.adbelhamed@mukit.at>",
     ],
     'depends': [
-        'muk_dms',
         'hr',
+        'muk_dms',
     ],
     "data": [
+        "security/dms_access_security.xml",
         'security/ir.model.access.csv',
-        'views/muk_dms_view_groups.xml',
-        'views/muk_dms_view_directory.xml',
-        'views/muk_dms_view_file.xml',
+        'views/dms_view_groups.xml',
+        'views/dms_view_directory.xml',
+        'views/dms_view_file.xml',
     ],
     'images': [
         'static/description/banner.png'
     ],
     "installable": True,
+    "post_init_hook": '_auto_default_group',
 }
