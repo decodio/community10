@@ -53,3 +53,8 @@ docs/_build/
 # Backup files
 *~
 *.swp
+
+# JS lib Build
+!build/
+build/*
+!build/*.js
