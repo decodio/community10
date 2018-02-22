@@ -13,7 +13,7 @@ from odoo import models, fields, api, tools, _
 from odoo.exceptions import ValidationError
 from odoo.report import interface
 from odoo.report.report_sxw import rml_parse
-from openerp.tools.safe_eval import safe_eval
+from odoo.tools.safe_eval import safe_eval
 from odoo.tools.config import config
 
 from ..report_aeroo import AerooReport
@@ -34,7 +34,7 @@ class ReportXml(models.Model):
         ('database', 'Database'),
         ('file', 'File'),
         ('lang', 'Different Template per Language'),
-    ], string='Template source', default='database', select=True)
+    ], string='Template source', default='database', index=True)
     parser_loc = fields.Char(
         'Parser location',
         help="Path to the parser location. Beginning of the path must be start \
