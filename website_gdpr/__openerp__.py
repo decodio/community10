@@ -22,15 +22,14 @@
 {
     'name': 'Website GDPR',
     'version': '0.1',
-    'category': 'website',
+    'category': 'Other',
     'summary': 'Portal and GDRP-information',
     'description': """
 
 * GDPR Website
 
 """,
-    'images': ['static/description/gdpr.png'],
-    'license': 'AGPL-3',
+    'images': ['static/description/event_participant.jpg'],
     'author': 'Vertel AB',
     'website': 'http://www.vertel.se',
     'depends': [

@@ -34,7 +34,10 @@
     'author': 'Vertel AB',
     'website': 'http://www.vertel.se',
     'depends': ['gdpr_inventory', 'mass_mailing'],
-    'data': [ 'gdpr_view.xml',
+    'data': [
+        'gdpr_view.xml',
+        'template.xml',
+        'security/ir.model.access.csv',
     ],
     'application': False,
     'installable': True,

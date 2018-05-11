@@ -3,6 +3,7 @@
     <data>
 
         <menuitem id="menu_gdpr" name="GDPR" parent="knowledge.menu_document" sequence="45"/>
+        <menuitem id="menu_gdpr_config" name="GDPR" parent="knowledge.menu_document_configuration" sequence="10" groups="base.group_gdpr_officer,base.group_gdpr_manager"/>
 
         <!-- GDPR Object -->
 
@@ -78,7 +79,7 @@
             <field name="arch" type="xml">
                 <form string="GDPR Consent">
                     <header>
-                        <field name="state" widget="statusbar" statusbar_visible="given,withdrawn" clickable="True"/>
+                        <field name="state" widget="statusbar" statusbar_visible="given,withdrawn,missing" clickable="True"/>
                     </header>
                     <sheet>
                         <div class="oe_title">
@@ -129,6 +130,7 @@
                     <filter string="Name" domain="[('name', '=', self)]"/>
                     <filter string="Consent Given" name="state_given" domain="[('state', '=', 'given')]"/>
                     <filter string="Consent Withdrawn" name="state_withdrawn" domain="[('state', '=', 'withdrawn')]"/>
+                    <filter string="Consent Missing" name="state_missing" domain="[('state', '=', 'missing')]"/>
                     <separator/>
                     <group expand="0" string="Group By">
                         <filter string="State" domain="[]" context="{'group_by': 'state'}"/>
@@ -172,7 +174,7 @@
             }</field>
             <field name="search_view_id" ref="view_gdpr_object_filter"/>
         </record>
-        
+
         <record id="ir_values_gdpr_inventory_2_gdpr_object" model="ir.values">
         <field name="name">View GDPR Objects</field>
         <field name="model">gdpr.inventory</field>
@@ -266,8 +268,8 @@
                                     <field name="data_sharing_ids" widget="many2many_tags"/>
                                 </group>
                             </page>
-                            
-                            
+
+
                             <page string="Identification">
                                 <label for="identification_desc"/>
                                 <field name="identification_desc"/>
@@ -281,8 +283,8 @@
                                     <field name="inventory_domain"/>
                                 </group>
                             </page>
-                            
-                            
+
+
                             <page string="Restrictions">
                                 <group>
                                     <field name="restrict_time_days"/>
@@ -492,7 +494,7 @@
             <field name="search_view_id" ref="view_gdpr_inventory_state_filter"/>
         </record>
 
-        <menuitem action="action_gdpr_inventory_state" id="menu_inventory_state" parent="menu_gdpr" sequence="21" groups="base.group_gdpr_manager"/>
+        <menuitem action="action_gdpr_inventory_state" id="menu_inventory_state" parent="menu_gdpr_config" sequence="21" groups="base.group_gdpr_manager"/>
 
         <!-- GDPR Lawsection -->
 
@@ -546,7 +548,7 @@
             <field name="search_view_id" ref="view_gdpr_lawsection_filter"/>
         </record>
 
-        <menuitem action="action_gdpr_lawsection" id="menu_gdpr_lawsection" parent="menu_gdpr" sequence="20" groups="base.group_gdpr_officer,base.group_gdpr_manager"/>
+        <menuitem action="action_gdpr_lawsection" id="menu_gdpr_lawsection" parent="menu_gdpr_config" sequence="20" groups="base.group_gdpr_officer,base.group_gdpr_manager"/>
 
         <!-- GDPR Security -->
 
@@ -599,7 +601,7 @@
             <field name="search_view_id" ref="view_gdpr_security_filter"/>
         </record>
 
-        <menuitem action="action_gdpr_security" id="menu_gdpr_security" parent="menu_gdpr" sequence="40" groups="base.group_gdpr_officer,base.group_gdpr_manager"/>
+        <menuitem action="action_gdpr_security" id="menu_gdpr_security" parent="menu_gdpr_config" sequence="40" groups="base.group_gdpr_officer,base.group_gdpr_manager"/>
 
         <!-- GDPR Restrict Method -->
 
@@ -662,7 +664,7 @@
             <field name="search_view_id" ref="view_gdpr_restrict_method_filter"/>
         </record>
 
-        <menuitem action="action_gdpr_restrict_method" id="menu_gdpr_restrict_method" parent="menu_gdpr" sequence="50" groups="base.group_gdpr_officer,base.group_gdpr_manager"/>
+        <menuitem action="action_gdpr_restrict_method" id="menu_gdpr_restrict_method" parent="menu_gdpr_config" sequence="50" groups="base.group_gdpr_officer,base.group_gdpr_manager"/>
 
         <!-- add a notebook page in ir.attachment -->
 
