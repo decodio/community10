@@ -4,7 +4,7 @@
         <field name="name">Freight</field>
         <field name="type">service</field>
         <field eval="False" name="purchase_ok"/>
-        <field eval="True" name="sale_ok"/>
+        <field eval="False" name="sale_ok"/>
         <field name="tms_product_category">freight</field>
     </record>
     <record id="product_move" model="product.product">
@@ -44,8 +44,8 @@
     </record>
     <record id="product_fuel" model="product.product">
         <field name="name">Fuel</field>
-        <field name="type">product</field>
-        <field eval="True" name="purchase_ok"/>
+        <field name="type">consu</field>
+        <field eval="False" name="purchase_ok"/>
         <field eval="False" name="sale_ok"/>
         <field name="tms_product_category">fuel</field>
     </record>

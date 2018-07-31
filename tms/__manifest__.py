@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Copyright 2012, Israel Cruz Argil, Argil Consulting
 # Copyright 2016, Jarsa Sistemas, S.A. de C.V.
@@ -6,25 +5,21 @@
 
 {
     "name": "Freight Management",
-    "version": "10.0.0.1.0",
+    "version": "10.0.2.0.1",
     "category": "Transport",
     "author": "Jarsa Sistemas, Argil Consulting",
     "website": "https://www.jarsa.com.mx/page/transport-management-system",
     "depends": [
         "account_accountant",
+        "account_cancel",
         "fleet",
         "hr",
-        "purchase",
-        "sale",
-        "base_geoengine",
         "account_operating_unit"
     ],
     'external_dependencies': {
         'python': [
             'sodapy',
             'num2words',
-            'pyproj',
-            'geojson',
         ],
     },
     "summary": "Management System for Carriers, Trucking and other companies",
@@ -40,6 +35,7 @@
         'views/hr_employee_view.xml',
         'views/fleet_vehicle_view.xml',
         'views/fleet_vehicle_log_fuel_view.xml',
+        'views/fleet_vehicle_log_fuel_prepaid_view.xml',
         'views/product_template_view.xml',
         'views/tms_advance_view.xml',
         'views/tms_config_settings_view.xml',
@@ -59,18 +55,19 @@
         'views/tms_route_tollstation_view.xml',
         'views/fleet_vehicle_engine_view.xml',
         'views/tms_route_note_view.xml',
-        'views/res_company_view.xml',
+        'views/tms_custom_house_view.xml',
+        'views/tms_custom_view.xml',
         'data/product_product_data.xml',
         'data/operating_unit.xml',
-        'data/paper_format.xml',
         'wizards/tms_wizard_payment_view.xml',
         'wizards/tms_wizard_invoice_view.xml',
-        'report/notes_report.xml',
+        'report/travel_instructions_letter.xml',
         'report/expense_report.xml',
         'data/ir_config_parameter.xml',
     ],
     "demo": [
         'demo/product_product.xml',
+        'demo/product_template.xml',
         'demo/fleet_vehicle_odometer.xml',
         'demo/ir_sequence.xml',
         'demo/operating_unit.xml',

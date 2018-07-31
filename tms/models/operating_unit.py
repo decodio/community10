@@ -11,6 +11,8 @@ class OperatingUnit(models.Model):
 
     travel_sequence_id = fields.Many2one(
         'ir.sequence', string='Travel Sequence')
+    prepaid_fuel_sequence_id = fields.Many2one(
+        'ir.sequence', string='Prepaid Sequence',)
     fuel_log_sequence_id = fields.Many2one(
         'ir.sequence', string='Fuel Log Sequence')
     advance_sequence_id = fields.Many2one(

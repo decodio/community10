@@ -1,4 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_fleet_vehicle_log_fuel_prepaid,access_fleet_vehicle_log_fuel_prepaid,model_fleet_vehicle_log_fuel_prepaid,,1,0,0,0
 monitoring_tms_waybill,access_tms_waybill,model_tms_waybill,group_monitoring,1,0,0,0
 monitoring_tms_travel,access_tms_travel,model_tms_travel,group_monitoring,1,0,0,0
 monitoring_tms_advance,access_tms_advance,model_tms_advance,group_monitoring,1,0,0,0
@@ -43,7 +44,7 @@ traffic_fleet_vehicle_odometer,access_fleet_vehicle_odometer,model_fleet_vehicle
 traffic_fleet_vehicle,access_fleet_vehicle,model_fleet_vehicle,group_traffic,1,1,1,0
 traffic_tms_extradata,access_tms_extradata,model_tms_extradata,group_traffic,1,1,1,1
 traffic_tms_extradata_type,traffic_tms_extradata_type,model_tms_extradata_type,group_traffic,1,1,1,0
-traffic_fleet_vehicle_log_services,access_fleet_vehicle_log_services,fleet.model_fleet_vehicle_log_services,group_traffic,1,1,1,0w
+traffic_fleet_vehicle_log_services,access_fleet_vehicle_log_services,fleet.model_fleet_vehicle_log_services,group_traffic,1,1,1,0
 traffic_fleet_vehicle_log_contract,access_fleet_vehicle_log_contract,fleet.model_fleet_vehicle_log_contract,group_traffic,1,1,1,0
 traffic_fleet_vehicle_cost,access_fleet_vehicle_cost,fleet.model_fleet_vehicle_cost,group_traffic,1,1,1,0
 traffic_fleet_vehicle_tag,access_fleet_vehicle_tag,fleet.model_fleet_vehicle_tag,group_traffic,1,1,1,0
@@ -60,6 +61,8 @@ traffic_tms_factor,traffic_tms_factor,model_tms_factor,group_traffic,1,1,1,1
 traffic_tms_route_note,traffic_tms_route_note,model_tms_route_note,group_traffic,1,1,1,1
 traffic_tms_waybill_line,traffic_tms_waybill_line,model_tms_waybill_line,group_traffic,1,1,1,1
 traffic_tms_waybill_taxes,traffic_tms_waybill_taxes,model_tms_waybill_taxes,group_traffic,1,1,1,1
+traffic_tms_custom_house,traffic_tms_custom_house,model_tms_custom_house,group_traffic,1,1,1,1
+traffic_tms_customs,traffic_tms_customs,model_tms_customs,group_traffic,1,1,1,1
 
 expenses_tms_waybill,access_tms_waybill,model_tms_waybill,group_expenses,1,1,1,0
 expenses_tms_travel,access_tms_travel,model_tms_travel,group_expenses,1,1,1,1

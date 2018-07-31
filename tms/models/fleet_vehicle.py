@@ -11,9 +11,9 @@ from odoo import api, fields, models
 class FleetVehicle(models.Model):
     _inherit = 'fleet.vehicle'
     _description = "Vehicle"
-    _order = 'name asc'
+    _order = 'name'
 
-    name = fields.Char(required=True)
+    name = fields.Char(compute=False, required=True)
     operating_unit_id = fields.Many2one(
         'operating.unit', string='Operating Unit')
     year_model = fields.Char()

@@ -15,7 +15,10 @@
         'views/tms_retention_view.xml',
         'views/product_template.xml',
         'security/ir.model.access.csv',
-        'data/product_product_data.xml',
+    ],
+    'demo': [
+        'demo/product_product.xml',
+        'demo/tms_retention.xml',
     ],
     'summary': 'Management System for Carriers, Trucking and other companies',
     'license': 'AGPL-3',

@@ -2,7 +2,7 @@
 # Copyright 2017, Jarsa Sistemas, S.A. de C.V.
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from openerp import models
+from odoo import models
 
 
 class AccountBankStatementLine(models.Model):
@@ -26,6 +26,7 @@ class AccountBankStatementLine(models.Model):
                     home_address.tms_expense_negative_account_id.id)
                 accounts = [account_employee,
                             line.partner_id.property_account_payable_id.id]
+                # Line.full_reconcile_id.id sometimes is False
                 payment_line = (
                     line.full_reconcile_id.
                     reconciled_line_ids.search([
@@ -50,5 +51,4 @@ class AccountBankStatementLine(models.Model):
                     for loan in loans:
                         loan.paid = True
                         loan.payment_move_id = res.id
-
             return res

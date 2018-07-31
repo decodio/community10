@@ -5,11 +5,12 @@
     'version': '10.0.1.0.0',
     'author': 'Serpent Consulting Services Pvt. Ltd.',
     'maintainer': 'Serpent Consulting Services Pvt. Ltd.',
-    'category': '',
+    'category': 'Tools',
     'license': 'AGPL-3',
     'complexity': 'easy',
     'depends': ['web'],
     'summary': 'Digital signature control',
+    'images': ['static/description/Digital_Signature.jpg'],
     'description': '''
      This module provides the functionality to store digital signature
      for a record.

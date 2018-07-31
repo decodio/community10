@@ -38,7 +38,8 @@
                 <field name="unit_id"/>
                 <field name="employee_id"/>
                 <field name="currency_id" invisible="1"/>
-                <field name="amount" widget='monetary'/>
+                <field name="amount" widget='monetary' sum="Amount Total"/>
+                <field name="product_id"/>
                 <field name="auto_expense"/>
                 <field name="paid"/>
                 <field name="state"/>
@@ -68,7 +69,7 @@
                     <group>
                         <group>
                             <field name="operating_unit_id" attrs="{'readonly':[('state','in',('confirmed','cancel','closed'))]}"/>
-                            <field name="travel_id" attrs="{'readonly':[('state','in',('cancel','closed'))]}" domain="[('state','!=','cancel'),('state','!=','closed'),('operating_unit_id', '=', operating_unit_id)]"/>
+                            <field name="travel_id" attrs="{'readonly':[('state','in',('cancel','closed','confirmed'))]}" domain="[('state','!=','cancel'),('state','!=','closed'),('operating_unit_id', '=', operating_unit_id)]"/>
                             <field name="unit_id"/>
                             <field name="employee_id"/>
                         </group>

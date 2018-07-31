@@ -19,7 +19,7 @@ class TmsEvent(models.Model):
          ('confirm', 'Confirm'),
          ('cancel', 'Cancel')], readonly=True, default='draft')
     date = fields.Date(
-        default=fields.Date.today,
+        default=fields.Date.context_today,
         required=True,
         states={'confirmed': [('readonly', True)],
                 'cancel': [('readonly', True)]})

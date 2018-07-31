@@ -20,10 +20,15 @@ class AccountInvoice(models.Model):
             expense_line = self.env['tms.expense.line'].search(
                 [('invoice_id', '=', self.id)])
             xml_str = base64.decodestring(xml_signed).lstrip(BOM_UTF8)
-            xml = objectify.fromstring(xml_str)
-            xml_vat_emitter = xml.Emisor.get('rfc', '')
-            xml_vat_receiver = xml.Receptor.get('rfc', '')
-            xml_amount = xml.get('total')
+            xml_str_rep = xml_str.replace(
+                'xmlns:schemaLocation', 'xsi:schemaLocation')
+            xml = objectify.fromstring(xml_str_rep)
+            xml_vat_emitter = xml.Emisor.get(
+                'rfc', xml.Emisor.get('Rfc', ''))
+            xml_vat_receiver = xml.Receptor.get(
+                'rfc', xml.Receptor.get('Rfc', ''))
+            xml_amount = xml.get(
+                'total', xml.get('Total', ''))
             xml_uuid = self.l10n_mx_edi_get_tfd_etree(xml)
         except AttributeError as ex:
             raise ValidationError(ex)
@@ -39,19 +44,15 @@ class AccountInvoice(models.Model):
                   'Expense line: ' + expense_line.name + '\nTravel: ' +
                   expense_line.travel_id.name))
         if xml_uuid:
-            xml_exists = self.search([('cfdi_fiscal_folio', '=', xml_uuid)])
+            xml_exists = self.search([('cfdi_uuid', '=', xml_uuid)])
             if xml_exists:
                 raise ValidationError(_(
                     'Can not attach this XML because other invoice already '
                     'have the same UUID that this XML. \n Invoice: %s'
                     '\n Line: %s') % (
                     xml_exists.number, expense_line.name))
-        inv_vat_receiver = (
-            self.company_id.address_parent_company_id.vat_split or
-            self.company_id.address_parent_company_id.vat)
-        inv_vat_emitter = (
-            self.commercial_partner_id.vat_split or
-            self.commercial_partner_id.vat)
+        inv_vat_receiver = self.company_id.address_parent_company_id.vat
+        inv_vat_emitter = self.commercial_partner_id.vat
         inv_amount = self.amount_total or 0.0
         msg = ''
         if not inv_vat_emitter:
@@ -84,7 +85,7 @@ class AccountInvoice(models.Model):
         if msg:
             raise ValidationError(msg)
         self.write({
-            'cfdi_fiscal_folio': xml_uuid,
+            'cfdi_uuid': xml_uuid,
             'xml_signed': base64.decodestring(xml_signed)})
         name = expense_line.xml_filename
         if not self.xml_signed:
@@ -101,3 +102,12 @@ class AccountInvoice(models.Model):
         }
         self.env['ir.attachment'].with_context({}).create(data_attach)
         return True
+
+    @api.multi
+    def _validate_invoice_xml(self, xml_signed):
+        xml_str = base64.decodestring(xml_signed).lstrip(BOM_UTF8)
+        xml_str_rep = xml_str.replace(
+            'xmlns:schemaLocation', 'xsi:schemaLocation')
+        xml_64 = base64.encodestring(xml_str_rep).lstrip(BOM_UTF8)
+        res = super(AccountInvoice, self)._validate_invoice_xml(xml_64)
+        return res

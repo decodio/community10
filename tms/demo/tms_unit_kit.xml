@@ -10,7 +10,6 @@
         <field name="date_start" eval="datetime.now()"/>
         <field name="date_end" eval="datetime.now()+timedelta(days=365)"/>
         <field name="active" eval="True"/>
-        <field name="operating_unit_id" ref="operating_unit.main_operating_unit"/>
     </record>
     <record id="tms_unit_kit_02" model="tms.unit.kit">
         <field name="name">Kit2</field>
@@ -22,7 +21,6 @@
         <field name="date_start" eval="datetime.now()"/>
         <field name="date_end" eval="datetime.now()+timedelta(days=365)"/>
         <field name="active" eval="True"/>
-        <field name="operating_unit_id" ref="operating_unit.main_operating_unit"/>
     </record>
     <record id="tms_unit_kit_03" model="tms.unit.kit">
         <field name="name">Kit3</field>
@@ -34,7 +32,6 @@
         <field name="date_start" eval="datetime.now()"/>
         <field name="date_end" eval="datetime.now()+timedelta(days=365)"/>
         <field name="active" eval="True"/>
-        <field name="operating_unit_id" ref="operating_unit.main_operating_unit"/>
     </record>
     <record id="tms_unit_kit_04" model="tms.unit.kit">
         <field name="name">Kit4</field>
@@ -46,7 +43,6 @@
         <field name="date_start" eval="datetime.now()"/>
         <field name="date_end" eval="datetime.now()+timedelta(days=365)"/>
         <field name="active" eval="True"/>
-        <field name="operating_unit_id" ref="operating_unit.main_operating_unit"/>
     </record>
     <record id="tms_unit_kit_06" model="tms.unit.kit">
         <field name="name">Kit5</field>
@@ -58,6 +54,5 @@
         <field name="date_start" eval="datetime.now()"/>
         <field name="date_end" eval="datetime.now()+timedelta(days=365)"/>
         <field name="active" eval="True"/>
-        <field name="operating_unit_id" ref="operating_unit.main_operating_unit"/>
     </record>
 </odoo>

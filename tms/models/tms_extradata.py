@@ -3,8 +3,8 @@
 # © <2016> <Jarsa Sistemas, S.A. de C.V.>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import api, fields, models
 from lxml import etree
+from odoo import api, fields, models
 
 
 class TmsExtradata(models.Model):
@@ -40,7 +40,6 @@ class TmsExtradata(models.Model):
         for value in values:
             if self.type == value[0]:
                 self.value_extra = value[1]
-                return self.value_extra
 
     @api.model
     def fields_view_get(self, view_id=None, view_type='form',
@@ -48,12 +47,13 @@ class TmsExtradata(models.Model):
         res = super(TmsExtradata, self).fields_view_get(
             view_id=view_id, view_type=view_type,
             toolbar=toolbar, submenu=submenu)
-        doc = etree.XML(res['arch'])
+        doc = etree.XML(res['arch'])  # pylint: disable=c-extension-no-member
         active_model = self._context['active_model_base']
         for node in doc.xpath("//field[@name='type_id']"):
             if active_model == 'fleet.vehicle':
                 node.set('domain', "[('apply_on', '=', 'unit')]")
             elif active_model == 'tms.waybill':
                 node.set('domain', "[('apply_on', '=', 'waybill')]")
-        res['arch'] = etree.tostring(doc)
+        res['arch'] = (
+            etree.tostring(doc))  # pylint: disable=c-extension-no-member
         return res

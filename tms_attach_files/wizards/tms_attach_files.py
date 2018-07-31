@@ -3,7 +3,8 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 
 import os
-from odoo import models, fields, api, _
+
+from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 

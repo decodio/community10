@@ -6,6 +6,7 @@
 from __future__ import division
 
 from datetime import datetime
+import pytz
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
@@ -21,7 +22,7 @@ class TmsExpense(models.Model):
     operating_unit_id = fields.Many2one(
         'operating.unit', string="Operating Unit", required=True)
     employee_id = fields.Many2one(
-        'hr.employee', 'Driver', required=True)
+        'hr.employee', 'Driver', required=True,)
     travel_ids = fields.Many2many(
         'tms.travel',
         string='Travels')
@@ -37,7 +38,7 @@ class TmsExpense(models.Model):
         ('cancel', 'Cancelled')], 'Expense State', readonly=True,
         help="Gives the state of the Travel Expense. ",
         default='draft')
-    date = fields.Date(required=True, default=fields.Date.today)
+    date = fields.Date(required=True, default=fields.Date.context_today)
     expense_line_ids = fields.One2many(
         'tms.expense.line', 'expense_id', 'Expense Lines')
     amount_real_expense = fields.Float(
@@ -130,7 +131,8 @@ class TmsExpense(models.Model):
     notes = fields.Text()
     move_id = fields.Many2one(
         'account.move', 'Journal Entry', readonly=True,
-        help="Link to the automatically generated Journal Items.")
+        help="Link to the automatically generated Journal Items.",
+        ondelete='restrict',)
     paid = fields.Boolean(
         compute='_compute_paid',
         store=True,
@@ -157,7 +159,8 @@ class TmsExpense(models.Model):
         readonly=True,
         compute="_compute_fuel_efficiency")
     payment_move_id = fields.Many2one(
-        'account.move', string='Payment Entry', readonly=True)
+        'account.move', string='Payment Entry',
+        readonly=True,)
     travel_days = fields.Char(
         compute='_compute_travel_days',
     )
@@ -172,7 +175,7 @@ class TmsExpense(models.Model):
     distance_routes = fields.Float(
         compute='_compute_distance_routes',
         string='Distance from routes',
-        help="Routes Distance")
+        help="Routes Distance", readonly=True)
     distance_real = fields.Float(
         help="Route obtained by electronic reading and/or GPS")
     income_km = fields.Float(
@@ -185,8 +188,17 @@ class TmsExpense(models.Model):
         'Productivity Percentage',
         compute='_compute_percentage_km',
     )
-    fuel_efficiency_real = fields.Float(
-    )
+    fuel_efficiency_real = fields.Float()
+    company_id = fields.Many2one(
+        'res.company', string='Company', required=True,
+        default=lambda self: self.env.user.company_id)
+
+    def _get_time(self, date):
+        start = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+        user = self.env.user
+        tz = pytz.timezone(user.tz) if user.tz else pytz.utc
+        start = pytz.utc.localize(start).astimezone(tz)
+        return start.strftime("%Y-%m-%d %H:%M:%S")
 
     @api.depends('travel_ids')
     def _compute_income_km(self):
@@ -229,14 +241,16 @@ class TmsExpense(models.Model):
     def _compute_travel_days(self):
         for rec in self:
             if rec.start_date and rec.end_date:
+                date_start = self._get_time(rec.start_date)
+                date_end = self._get_time(rec.end_date)
                 strp_start_date = datetime.strptime(
-                    rec.start_date, "%Y-%m-%d %H:%M:%S")
+                    date_start, "%Y-%m-%d %H:%M:%S")
                 strp_end_date = datetime.strptime(
-                    rec.end_date, "%Y-%m-%d %H:%M:%S")
+                    date_end, "%Y-%m-%d %H:%M:%S")
                 difference = strp_end_date - strp_start_date
                 days = int(difference.days) + 1
                 hours = int(difference.seconds / 3600)
-                mins = int((difference.seconds - (hours * 3600))/60)
+                mins = int((difference.seconds - (hours * 3600)) / 60)
                 seconds = difference.seconds - ((hours * 3600) + (mins * 60))
                 if hours < 10:
                     hours = '0' + str(hours)
@@ -488,7 +502,7 @@ class TmsExpense(models.Model):
                     'expense_id': False,
                     'state': 'confirmed'
                 })
-                return super(TmsExpense, self).unlink()
+            return super(TmsExpense, self).unlink()
 
     @api.multi
     def action_approved(self):
@@ -506,18 +520,16 @@ class TmsExpense(models.Model):
     def prepare_move_line(self, name, ref, account_id,
                           debit, credit, journal_id,
                           partner_id, operating_unit_id):
-        return (
-            0, 0,
-            {
-                'name': name,
-                'ref': ref,
-                'account_id': account_id,
-                'debit': debit,
-                'credit': credit,
-                'journal_id': journal_id,
-                'partner_id': partner_id,
-                'operating_unit_id': operating_unit_id,
-            })
+        return (0, 0, {
+            'name': name,
+            'ref': ref,
+            'account_id': account_id,
+            'debit': debit,
+            'credit': credit,
+            'journal_id': journal_id,
+            'partner_id': partner_id,
+            'operating_unit_id': operating_unit_id,
+        })
 
     @api.model
     def create_fuel_vouchers(self, line):
@@ -525,7 +537,8 @@ class TmsExpense(models.Model):
             fuel_voucher = rec.env['fleet.vehicle.log.fuel'].create({
                 'operating_unit_id': rec.operating_unit_id.id,
                 'travel_id': line.travel_id.id,
-                'vehicle_id': line.travel_id.unit_id.id,
+                'vehicle_id': (
+                    line.travel_id.unit_id.id or line.expense_id.unit_id.id),
                 'product_id': line.product_id.id,
                 'price_unit': line.unit_price,
                 'price_subtotal': line.price_subtotal,
@@ -533,14 +546,15 @@ class TmsExpense(models.Model):
                 'product_qty': line.product_qty,
                 'tax_amount': line.tax_amount,
                 'state': 'closed',
-                'employee_id':  rec.employee_id.id,
+                'employee_id': rec.employee_id.id,
                 'price_total': line.price_total,
-                'date': str(fields.Date.today()),
-                'expense_control': True,
+                'date': line.date,
                 'expense_id': rec.id,
                 'ticket_number': line.invoice_number,
+                'created_from_expense': True,
+                'expense_line_id': line.id,
                 })
-            line.control = True
+            line.write({'expense_fuel_log': True})
             return fuel_voucher
 
     @api.multi
@@ -608,7 +622,7 @@ class TmsExpense(models.Model):
             inv_id = False
             if line.is_invoice:
                 inv_id = rec.create_supplier_invoice(line)
-                inv_id.signal_workflow('invoice_open')
+                inv_id.action_invoice_open()
                 result['invoices'].append(inv_id)
                 move_line = rec.prepare_move_line(
                     (rec.name + ' ' + line.name +
@@ -630,7 +644,6 @@ class TmsExpense(models.Model):
                   ['salary', 'other_income', 'salary_discount']):
                 continue
             else:
-
                 move_line = rec.prepare_move_line(
                     rec.name + ' ' + line.name,
                     rec.name,
@@ -650,7 +663,6 @@ class TmsExpense(models.Model):
                 tax_account = tax.account_id.id
                 if not tax_account:
                     raise ValidationError(
-                        _('Warning !'),
                         _('Tax Account is not defined for '
                           'Tax %s (id:%d)') % (tax.name, tax.id,))
                 tax_amount = line.tax_amount
@@ -674,7 +686,8 @@ class TmsExpense(models.Model):
         for rec in self:
             # We only need all the lines except the fuel and the
             # made up expenses
-            if line.line_type == 'fuel' and not line.control:
+            if line.line_type == 'fuel' and (
+                    not line.control or line.expense_fuel_log):
                 rec.create_fuel_vouchers(line)
             if line.line_type not in (
                     'made_up_expense', 'fuel', 'tollstations'):
@@ -702,8 +715,10 @@ class TmsExpense(models.Model):
         for rec in self:
             balance = rec.amount_balance
             if (rec.employee_id.outsourcing and rec.expense_line_ids.filtered(
-                    lambda x: x.line_type == 'other_income')):
-                balance = (balance - rec.amount_other_income) - sum(
+                    lambda x: x.line_type in ['other_income', 'salary'])):
+                balance = (
+                    balance - rec.amount_other_income -
+                    rec.amount_salary) - sum(
                     rec.expense_line_ids.filtered(
                         lambda y: y.line_type == 'salary_discount').mapped(
                         'price_total'))
@@ -737,7 +752,6 @@ class TmsExpense(models.Model):
                 'journal_id': result['journal_id'],
                 'name': rec.name,
                 'line_ids': [line for line in result['move_lines']],
-                'partner_id': rec.env.user.company_id.id,
                 'operating_unit_id': rec.operating_unit_id.id,
             }
             move_id = result['move_obj'].create(move)
@@ -758,6 +772,9 @@ class TmsExpense(models.Model):
     @api.multi
     def action_confirm(self):
         for rec in self:
+            if rec.move_id:
+                raise ValidationError(
+                    _('You can not confirm a confirmed expense.'))
             result = rec.higher_than_zero_move()
             for line in rec.expense_line_ids:
                 rec.create_expense_line_move_line(line, result)
@@ -769,6 +786,7 @@ class TmsExpense(models.Model):
 
     @api.multi
     def action_cancel(self):
+        self.ensure_one()
         if self.paid:
             raise ValidationError(
                 _('You cannot cancel an expense that is paid.'))
@@ -783,12 +801,16 @@ class TmsExpense(models.Model):
                         'cfdi_fiscal_folio': False,
                         'xml_signed': False,
                         'reference': False,
-                        })
+                    })
                     line.invoice_id.signal_workflow('invoice_cancel')
                     line.invoice_id = False
             if self.move_id.state == 'posted':
                 self.move_id.button_cancel()
-            self.move_id.unlink()
+            move_id = self.move_id
+            self.move_id = False
+            move_id.unlink()
+            self.fuel_log_ids.filtered(
+                lambda x: x.created_from_expense).unlink()
         self.state = 'cancel'
 
     @api.multi
@@ -814,10 +836,11 @@ class TmsExpense(models.Model):
                 'state': 'confirmed'
             })
             fuel_logs = self.env['fleet.vehicle.log.fuel'].search(
-                [('expense_id', '=', rec.id)])
+                [('expense_id', '=', rec.id),
+                 ('created_from_expense', '=', False)])
             fuel_logs.write({
                 'expense_id': False,
-                'state': 'confirmed'
+                'state': 'confirmed',
             })
 
     @api.multi
@@ -873,6 +896,8 @@ class TmsExpense(models.Model):
                     '\n Name of voucher not confirmed: ' +
                     fuel_log.name +
                     '\n State: ' + fuel_log.state))
+            elif fuel_log.expense_line_id:
+                fuel_expense = fuel_log.expense_line_id
             else:
                 fuel_expense = rec.expense_line_ids.create({
                     'name': _(
@@ -892,12 +917,12 @@ class TmsExpense(models.Model):
                     'date': fuel_log.date,
                     'invoice_number': fuel_log.ticket_number,
                 })
-                if fuel_log.expense_control:
-                    fuel_expense.name = fuel_expense.product_id.name
+            if fuel_expense:
                 fuel_log.write({
                     'state': 'closed',
                     'expense_id': rec.id
                 })
+        return fuel_expense
 
     @api.multi
     def create_salary_line(self, travel):
@@ -970,7 +995,7 @@ class TmsExpense(models.Model):
                 if ac_loan:
                     loan.write({
                         'expense_id': self.id
-                        })
+                    })
                     total_discount = self.calculate_discounts(methods, loan)
                     total_final = loan.balance - total_discount
                     if total_final <= 0.0:
@@ -979,7 +1004,7 @@ class TmsExpense(models.Model):
                     expense_line = self.expense_line_ids.create({
                         'name': _("Loan: ") + str(loan.name),
                         'expense_id': self.id,
-                        'line_type': "salary_discount",
+                        'line_type': "loan",
                         'product_id': loan.product_id.id,
                         'product_qty': 1.0,
                         'unit_price': total_discount,
@@ -1133,9 +1158,8 @@ class TmsExpense(models.Model):
                     _('Error ! Move line was not found,'
                         ' please check your data.'))
             move_ids.append(expense_move_line.id)
-            for move_line in invoice.move_id.line_ids:
-                if move_line.account_id.internal_type == 'payable':
-                    invoice_move_line_id = move_line
+            invoice_move_line_id = invoice.move_id.line_ids.filtered(
+                lambda x: x.account_id.reconcile)
             move_ids.append(invoice_move_line_id.id)
             reconcile_ids = move_line_obj.browse(move_ids)
             reconcile_ids.reconcile()
@@ -1147,13 +1171,18 @@ class TmsExpense(models.Model):
             ('operating_unit_id', '=', self.operating_unit_id.id),
             ('state', '=', 'done'),
             ('unit_id', '=', self.unit_id.id)])
-        self.employee_id = False
+        employee_ids = travels.mapped('employee_id').ids
+        if self.employee_id.id not in employee_ids:
+            self.employee_id = False
+        tlines_units = self.travel_ids.mapped('unit_id').ids
+        tlines_drivers = self.travel_ids.mapped('employee_id').ids
+        if (self.unit_id.id not in tlines_units and
+                self.employee_id.id not in tlines_drivers):
+            self.travel_ids = False
         return {
             'domain': {
                 'employee_id': [
-                    ('id', 'in', [x.employee_id.id for x in travels]),
-                    ('driver', '=', True)
-                ]
+                    ('id', 'in', employee_ids), ('driver', '=', True)],
             }
         }
 

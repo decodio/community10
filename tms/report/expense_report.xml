@@ -267,7 +267,4 @@
         </t>
     </template>
     <report file="tms.expense_report" id="print_expense_report" model="tms.expense" name="tms.expense_report" report_type="qweb-pdf" string="Expense Report"/>
-    <record id="print_expense_report" model="ir.actions.report.xml">
-        <field name="paperformat_id" ref="tms.paperformat_94_151_tms"/>
-    </record>
 </odoo>

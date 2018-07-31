@@ -122,6 +122,9 @@ class TmsTravel(models.Model):
     partner_ids = fields.Many2many(
         'res.partner', string='Customer', compute='_compute_partner_ids',
         store=True)
+    company_id = fields.Many2one(
+        'res.company', string='Company', required=True,
+        default=lambda self: self.env.user.company_id)
 
     @api.depends('waybill_ids')
     def _compute_partner_ids(self):
@@ -179,22 +182,18 @@ class TmsTravel(models.Model):
 
     @api.onchange('kit_id')
     def _onchange_kit(self):
-        for rec in self:
-            rec.unit_id = rec.kit_id.unit_id
-            rec.trailer2_id = rec.kit_id.trailer2_id
-            rec.trailer1_id = rec.kit_id.trailer1_id
-            rec.dolly_id = rec.kit_id.dolly_id
-            rec.employee_id = rec.kit_id.employee_id
+        self.unit_id = self.kit_id.unit_id.id
+        self.trailer2_id = self.kit_id.trailer2_id.id
+        self.trailer1_id = self.kit_id.trailer1_id.id
+        self.dolly_id = self.kit_id.dolly_id.id
+        self.employee_id = self.kit_id.employee_id.id
 
     @api.onchange('route_id')
     def _onchange_route(self):
-        self.driver_factor_ids = self.route_id.driver_factor_ids
         self.travel_duration = self.route_id.travel_time
-        for rec in self:
-            rec.driver_factor_ids = rec.route_id.driver_factor_ids
-            rec.distance_route = rec.route_id.distance
-            rec.distance_loaded = rec.route_id.distance_loaded
-            rec.distance_empty = rec.route_id.distance_empty
+        self.distance_route = self.route_id.distance
+        self.distance_loaded = self.route_id.distance_loaded
+        self.distance_empty = self.route_id.distance_empty
 
     @api.depends('distance_empty', 'distance_loaded')
     def _compute_distance_driver(self):
@@ -220,7 +219,7 @@ class TmsTravel(models.Model):
                     _('The unit or driver are already in use!'))
             rec.state = "progress"
             rec.date_start_real = fields.Datetime.now()
-            rec.message_post('Travel Dispatched')
+            rec.message_post(_('Travel Dispatched'))
 
     @api.multi
     def action_done(self):
@@ -236,7 +235,7 @@ class TmsTravel(models.Model):
             rec.state = "done"
             rec.odometer = odometer.current_odometer
             rec.date_end_real = fields.Datetime.now()
-            rec.message_post('Travel Finished')
+            rec.message_post(_('Travel Finished'))
 
     @api.multi
     def action_cancel(self):
@@ -253,7 +252,7 @@ class TmsTravel(models.Model):
                       ' you must cancel the fuel logs or the advances '
                       'attached to this travel'))
             rec.state = "cancel"
-            rec.message_post('Travel Cancelled')
+            rec.message_post(_('Travel Cancelled'))
 
     @api.model
     def create(self, values):
@@ -323,8 +322,8 @@ class TmsTravel(models.Model):
             if rec.employee_id.days_to_expire <= days:
                 raise ValidationError(
                     _("You can not Dispatch this Travel because %s "
-                      "Driver's License Validity (%s) is expired or"
-                      " about to expire in next %s day(s)") % (
+                      "Driver s License Validity %s is expired or"
+                      " about to expire in next %s days") % (
                         rec.employee_id.name,
                         rec.employee_id.license_expiration, val))
 
@@ -343,8 +342,8 @@ class TmsTravel(models.Model):
                             '%Y-%m-%d')):
                     raise ValidationError(_(
                         "You can not Dispatch this Travel because this Vehicle"
-                        "(%s) Insurance (%s) is expired or about to expire in "
-                        "next %s day(s)") % (
+                        " %s Insurance %s is expired or about to expire in "
+                        "next %s days") % (
                         rec.unit_id.name, rec.unit_id.insurance_expiration,
                         val))
 

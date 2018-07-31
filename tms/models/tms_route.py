@@ -108,21 +108,20 @@ class TmsRoute(models.Model):
                 result = json.loads(requests.get(url, params=params).content)
                 distance = duration = 0.0
                 if result['status'] == 'OK':
-                    if rec.route_place_ids:
+                    if rec.route_place_ids or (rec.departure_id and
+                                               rec.arrival_id):
+                        pos = 0
                         for row in result['rows']:
                             distance += (
-                                row['elements'][1]['distance']
+                                row['elements'][pos]['distance']
                                    ['value'] / 1000.0)
                             duration += (
-                                row['elements'][1]['duration']
+                                row['elements'][pos]['duration']
                                    ['value'] / 3600.0)
-                    else:
-                        res = result['rows'][0]['elements'][0]
-                        distance = res['distance']['value'] / 1000.0
-                        duration = res['duration']['value'] / 3600.0
+                            pos += 1
                 self.distance = distance
                 self.travel_time = duration
-            except:
+            except Exception:
                 raise exceptions.UserError(_("Google Maps is not available."))
 
     @api.multi

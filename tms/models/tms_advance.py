@@ -3,7 +3,8 @@
 # Copyright 2016, Jarsa Sistemas, S.A. de C.V.
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import _, api, exceptions, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class TmsAdvance(models.Model):
@@ -26,7 +27,7 @@ class TmsAdvance(models.Model):
         default='draft')
     date = fields.Date(
         required=True,
-        default=fields.Date.today)
+        default=fields.Date.context_today)
     travel_id = fields.Many2one(
         'tms.travel',
         required=True,
@@ -47,7 +48,8 @@ class TmsAdvance(models.Model):
         'account.move', 'Journal Entry',
         help="Link to the automatically generated Journal Items.\nThis move "
         "is only for Travel Expense Records with balance < 0.0",
-        readonly=True)
+        readonly=True,
+        ondelete='restrict',)
     paid = fields.Boolean(
         compute='_compute_paid',
         readonly=True,
@@ -55,7 +57,7 @@ class TmsAdvance(models.Model):
     payment_move_id = fields.Many2one(
         'account.move',
         string="Payment Entry",
-        readonly=True)
+        readonly=True,)
     currency_id = fields.Many2one(
         'res.currency',
         'Currency',
@@ -69,6 +71,9 @@ class TmsAdvance(models.Model):
     product_id = fields.Many2one(
         'product.product', string='Product', required=True,
         domain=[('tms_product_category', '=', 'real_expense')])
+    company_id = fields.Many2one(
+        'res.company', string='Company', required=True,
+        default=lambda self: self.env.user.company_id)
 
     @api.multi
     @api.depends('travel_id')
@@ -84,18 +89,18 @@ class TmsAdvance(models.Model):
     @api.model
     def create(self, values):
         res = super(TmsAdvance, self).create(values)
-        sequence = res.operating_unit_id.advance_sequence_id
-        if res.amount <= 0:
-            raise exceptions.ValidationError(
-                _('The amount must be greater than zero.'))
+        if res.operating_unit_id.advance_sequence_id:
+            sequence = res.operating_unit_id.advance_sequence_id
         else:
-            res.name = sequence.next_by_id()
-            if res.name == 'False':
-                raise exceptions.ValidationError(
-                    _('Error you need define an'
-                        ' advance sequence in the base.'))
-            else:
-                return res
+            raise ValidationError(
+                _('The sequence is not '
+                    'defined in operating unit %s' %
+                    res.operating_unit_id.name))
+        if res.amount <= 0:
+            raise ValidationError(
+                _('The amount must be greater than zero.'))
+        res.name = sequence.next_by_id()
+        return res
 
     @api.onchange('travel_id')
     def _onchange_travel_id(self):
@@ -128,8 +133,11 @@ class TmsAdvance(models.Model):
     def action_confirm(self):
         for rec in self:
             if rec.amount <= 0:
-                raise exceptions.ValidationError(
+                raise ValidationError(
                     _('The amount must be greater than zero.'))
+            if rec.move_id:
+                raise ValidationError(
+                    _('You can not confirm a confirmed advance.'))
             else:
                 obj_account_move = self.env['account.move']
                 advance_journal_id = (
@@ -143,17 +151,17 @@ class TmsAdvance(models.Model):
                     address_home_id.property_account_payable_id.id
                 )
                 if not advance_journal_id:
-                    raise exceptions.ValidationError(
+                    raise ValidationError(
                         _('Warning! The advance does not have a journal'
-                          ' assigned. \nCheck if you already set the '
+                          ' assigned. Check if you already set the '
                           'journal for advances in the base.'))
                 if not advance_credit_account_id:
-                    raise exceptions.ValidationError(
+                    raise ValidationError(
                         _('Warning! The driver does not have a home address'
-                          ' assigned. \nCheck if you already set the '
+                          ' assigned. Check if you already set the '
                           'home address for the employee.'))
                 if not advance_debit_account_id:
-                    raise exceptions.ValidationError(
+                    raise ValidationError(
                         _('Warning! You must have configured the accounts '
                           'of the tms'))
                 move_lines = []
@@ -194,37 +202,32 @@ class TmsAdvance(models.Model):
                         'operating_unit_id': rec.operating_unit_id.id
                     }
                     move_id = obj_account_move.create(move)
-                    if not move_id:
-                        raise exceptions.ValidationError(
-                            _('An error has occurred in the creation'
-                                ' of the accounting move. '))
-                    else:
-                        move_id.post()
-                        rec.move_id = move_id.id
-                        rec.state = 'confirmed'
-                        rec.message_post(
-                            _('<strong>Advance confirmed.</strong>'))
+                    move_id.post()
+                    rec.move_id = move_id.id
+                    rec.state = 'confirmed'
+                    rec.message_post(
+                        _('<strong>Advance confirmed.</strong>'))
 
     @api.multi
     def action_cancel(self):
         for rec in self:
             if rec.paid:
-                raise exceptions.ValidationError(
+                raise ValidationError(
                     _('Could not cancel this advance because'
                         ' the advance is already paid. '
                         'Please cancel the payment first.'))
-            else:
-                if rec.move_id.state == 'posted':
-                    rec.move_id.button_cancel()
-                rec.move_id.unlink()
-                rec.state = 'cancel'
-                rec.message_post(_('<strong>Advance cancelled.</strong>'))
+            move_id = rec.move_id
+            rec.move_id = False
+            move_id.button_cancel()
+            move_id.unlink()
+            rec.state = 'cancel'
+            rec.message_post(_('<strong>Advance cancelled.</strong>'))
 
     @api.multi
     def action_cancel_draft(self):
         for rec in self:
             if rec.travel_id.state == 'cancel':
-                raise exceptions.ValidationError(
+                raise ValidationError(
                     _('Could not set this advance to draft because'
                         ' the travel is cancelled.'))
             else:
@@ -241,5 +244,5 @@ class TmsAdvance(models.Model):
                     'journal_id': bank.id,
                     'amount_total': rec.amount,
                     'date': rec.date,
-                    })
+                })
             wiz.make_payment()

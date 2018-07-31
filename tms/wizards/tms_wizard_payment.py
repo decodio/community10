@@ -15,7 +15,7 @@ class TmsWizardPayment(models.TransientModel):
         'account.journal', string='Bank Account',
         domain="[('type', '=', 'bank')]")
     amount_total = fields.Float(compute='_compute_amount_total')
-    date = fields.Date(required=True, default=fields.Date.today())
+    date = fields.Date(required=True, default=fields.Date.context_today)
     notes = fields.Text()
 
     @api.depends('journal_id')
@@ -82,16 +82,18 @@ class TmsWizardPayment(models.TransientModel):
                     'tms.expense.loan': obj.amount
                     if hasattr(obj, 'amount') and
                     active_model == 'tms.expense.loan'else 0.0}
-                # Createng counterpart move lines method explained above
+                # Creating counterpart move lines method explained above
                 counterpart_move_line, amount_bank = self.create_counterpart(
                     model_amount, currency, obj,
                     amount_currency, amount_bank, counterpart_move_line)
                 self._create_payment(counterpart_move_line, rec)
                 move_lines.append((0, 0, counterpart_move_line))
-            if amount_currency > 0.0:
-                bank_line['amount_currency'] = amount_currency
-                bank_line['currency_id'] = currency.id
-            operating_unit_id = self.env['operating.unit'].browse(1)
+                if amount_currency > 0.0:
+                    bank_line['amount_currency'] = amount_currency
+                    bank_line['currency_id'] = currency.id
+                    # Todo Separate the bank line for each Operating Unit
+            operating_unit_id = self.env['operating.unit'].search(
+                [], limit=1)
             bank_line = {
                 'name': name,
                 'account_id': bank_account_id,
@@ -158,21 +160,22 @@ class TmsWizardPayment(models.TransientModel):
     def create_moves_and_reconciles(self, move, active_ids):
         move_id = self.env['account.move'].create(move)
         move_id.post()
-        for move_line in move_id.line_ids:
+        journal_id = active_ids.mapped('move_id.journal_id')
+        for move_line in move_id.line_ids.filtered(
+                lambda l: l.account_id.internal_type == 'payable'):
             move_ids = []
-            if move_line.account_id.internal_type == 'payable':
-                line = self.env['account.move.line'].search([
-                    ('name', '=', move_line.name),
-                    ('account_id.internal_type', '=', 'payable'),
-                    ('move_id', '!=', move_id.id)])
-                if len(line) > 1:
-                    raise ValidationError(_(
-                        'The driver advance account is defined as '
-                        'payable. %s ' % line[0].name))
-                move_ids.append(line.id)
-                move_ids.append(move_line.id)
-                reconcile_ids = self.env['account.move.line'].browse(
-                    move_ids)
-                reconcile_ids.reconcile()
-        for obj in active_ids:
-            obj.payment_move_id = move_id
+            line = self.env['account.move.line'].search([
+                ('name', '=', move_line.name),
+                ('account_id.internal_type', '=', 'payable'),
+                ('move_id', '!=', move_id.id),
+                ('journal_id', '=', journal_id.id)])
+            if len(line) > 1:
+                raise ValidationError(_(
+                    'The driver advance account is defined as '
+                    'payable. %s ' % line[0].name))
+            move_ids.append(line.id)
+            move_ids.append(move_line.id)
+            reconcile_ids = self.env['account.move.line'].browse(
+                move_ids)
+            reconcile_ids.reconcile()
+        active_ids.write({'payment_move_id': move_id.id})

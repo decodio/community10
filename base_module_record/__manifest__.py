@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
+# See LICENSE file for full copyright and licensing details.
 
 {
     'name': 'Record and Create Modules',
@@ -17,7 +17,5 @@
     ],
     'installable': True,
     'auto_install': False,
-    'images': ['images/base_module_record1.jpeg',
-               'images/base_module_record2.jpeg',
-               'images/base_module_record3.jpeg', ]
+    'images': ['static/description/record_banner.png'],
 }

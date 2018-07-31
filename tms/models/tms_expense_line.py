@@ -17,8 +17,7 @@ class TmsExpenseLine(models.Model):
         string='Travel')
     expense_id = fields.Many2one(
         'tms.expense',
-        string='Expense',
-        readonly=True)
+        string='Expense',)
     product_qty = fields.Float(
         string='Qty', default=1.0)
     unit_price = fields.Float()
@@ -74,8 +73,7 @@ class TmsExpenseLine(models.Model):
         "Fuel Vouchers for this line automatically")
     is_invoice = fields.Boolean(string='Is Invoice?')
     partner_id = fields.Many2one(
-        'res.partner', string='Supplier',
-        domain=[('company_type', '=', 'company')])
+        'res.partner', string='Supplier',)
     invoice_date = fields.Date('Date')
     invoice_number = fields.Char()
     invoice_id = fields.Many2one(
@@ -88,6 +86,7 @@ class TmsExpenseLine(models.Model):
     route_id = fields.Many2one(
         'tms.route', related='travel_id.route_id',
         string='Route', readonly=True)
+    expense_fuel_log = fields.Boolean(readonly=True)
 
     @api.onchange('product_id')
     def _onchange_product_id(self):
@@ -110,7 +109,7 @@ class TmsExpenseLine(models.Model):
                 rec.unit_price, rec.expense_id.currency_id,
                 rec.product_qty,
                 rec.expense_id.employee_id.address_home_id)
-            if taxes:
+            if taxes['taxes']:
                 for tax in taxes['taxes']:
                     rec.tax_amount += tax['amount']
             else:

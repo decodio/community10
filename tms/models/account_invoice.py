@@ -13,7 +13,7 @@ class AccountInvoice(models.Model):
 
     @api.onchange('journal_id')
     def _onchange_journal_id(self):
-        if self.waybill_ids:
-            self.currency_id = self.waybill_ids[0].currency_id.id
-        else:
+        if not self.waybill_ids:
             return super(AccountInvoice, self)._onchange_journal_id()
+        self.currency_id = self.waybill_ids[0].currency_id.id
+        return True

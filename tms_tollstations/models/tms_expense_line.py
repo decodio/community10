@@ -63,11 +63,10 @@ class TmsExpenseLine(models.Model):
         return super(TmsExpenseLine, self).unlink()
 
     @api.multi
-    def get_ordered_lines(self):
+    def sort_expense_lines(self):
         for rec in self:
-            sorted_array = sorted(
+            ordered_lines = sorted(
                 rec.tollstation_ids,
                 key=lambda x: datetime.strptime(
-                    x['date'], '%Y-%m-%d %H:%M:%S'),
-                reverse=True)
-            return sorted_array
+                    x['date'], '%Y-%m-%d %H:%M:%S'))
+            return ordered_lines

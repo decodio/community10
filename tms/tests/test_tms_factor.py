@@ -2,6 +2,7 @@
 # Copyright 2016, Jarsa Sistemas, S.A. de C.V.
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
+from odoo.exceptions import ValidationError
 from odoo.tests.common import TransactionCase
 
 
@@ -10,6 +11,7 @@ class TestTmsFactor(TransactionCase):
     def setUp(self):
         super(TestTmsFactor, self).setUp()
         self.factor = self.env['tms.factor']
+        self.employee = self.env.ref('tms.tms_hr_employee_01')
 
     def test_10_tms_factor_onchange_factor_type(self):
         factor_type_list = [
@@ -26,102 +28,72 @@ class TestTmsFactor(TransactionCase):
             'name': 'distance',
             'category': 'driver',
             'factor_type': 'distance',
-            })
+        })
         for record in factor_type_list:
             factor.write({'factor_type': record[0]})
             factor._onchange_factor_type()
             self.assertEqual(factor.name, record[1], 'Onchange is not working')
 
-    def test_20_get_amount_distance(self):
-        factor = self.factor.create({
+    def create_factor(self):
+        return self.factor.create({
             'name': 'distance',
             'category': 'driver',
             'factor_type': 'distance',
             'factor': 2,
-            })
+        })
+
+    def test_20_get_amount_distance(self):
+        factor = self.create_factor()
         value = factor.get_amount(distance=100)
         self.assertEqual(value, 200, 'Error in factor calculation (distance)')
 
     def test_21_get_amount_distance_range(self):
-        factor = self.factor.create({
-            'name': 'distance',
-            'category': 'driver',
-            'factor_type': 'distance',
-            'range_start': 0,
-            'range_end': 1000,
-            'factor': 2,
-            })
-        factor2 = self.factor.create({
-            'name': 'distance',
-            'category': 'driver',
-            'factor_type': 'distance',
-            'range_start': 1001,
-            'range_end': 2000,
-            'factor': 1,
-            })
-        factors = self.factor.browse([factor.id, factor2.id])
-        value = factors.get_amount(distance=100)
+        factor = self.create_factor()
+        factor2 = self.create_factor()
+        factor2.factor = 1
+        value = factor.get_amount(distance=100)
         self.assertEqual(value, 200, 'Error in factor calculation (distance)')
-        value = factors.get_amount(distance=1500)
+        value = factor2.get_amount(distance=1500)
         self.assertEqual(value, 1500, 'Error in factor calculation (distance)')
 
     def test_22_get_amount_distance_fixed_amount(self):
-        factor = self.factor.create({
-            'name': 'distance',
-            'category': 'driver',
-            'factor_type': 'distance',
-            'factor': 2,
-            'mixed': True,
-            'fixed_amount': 100,
-            })
+        factor = self.create_factor()
+        factor.fixed_amount = 100
+        factor.mixed = True
         value = factor.get_amount(distance=100)
         self.assertEqual(value, 300, 'Error in factor calculation (distance)')
 
     def test_30_get_amount_distance_real(self):
-        factor = self.factor.create({
-            'name': 'distance_real',
-            'category': 'driver',
-            'factor_type': 'distance_real',
-            'factor': 2,
-            })
+        factor = self.create_factor()
+        factor.factor_type = 'distance_real'
         value = factor.get_amount(distance_real=100)
         self.assertEqual(
             value, 200, 'Error in factor calculation (distance_real)')
 
     def test_31_get_amount_distance_real_range(self):
-        factor = self.factor.create({
-            'name': 'distance_real',
-            'category': 'driver',
-            'factor_type': 'distance_real',
-            'range_start': 0,
-            'range_end': 1000,
-            'factor': 2,
-            })
-        factor2 = self.factor.create({
-            'name': 'distance_real',
-            'category': 'driver',
-            'factor_type': 'distance_real',
-            'range_start': 1001,
-            'range_end': 2000,
-            'factor': 1,
-            })
-        factors = self.factor.browse([factor.id, factor2.id])
-        value = factors.get_amount(distance_real=100)
+        factor = self.create_factor()
+        factor.factor = 2
+        factor.range_start = 0
+        factor.factor_type = 'distance_real'
+        factor.range_end = 1000
+        factor2 = self.create_factor()
+        factor2.factor_type = 'distance_real'
+        factor2.factor = 1
+        factor2.range_start = 1001
+        factor2.range_end = 2000
+        value = factor.get_amount(distance_real=100)
         self.assertEqual(
             value, 200, 'Error in factor calculation (distance_real)')
-        value = factors.get_amount(distance_real=1500)
+        value = factor2.get_amount(distance_real=1500)
         self.assertEqual(
             value, 1500, 'Error in factor calculation (distance_real)')
 
     def test_32_get_amount_distance_real_fixed_amount(self):
-        factor = self.factor.create({
-            'name': 'distance_real',
-            'category': 'driver',
-            'factor_type': 'distance_real',
-            'factor': 2,
-            'mixed': True,
-            'fixed_amount': 100,
-            })
+        factor = self.create_factor()
+        factor.factor_type = 'distance_real'
+        factor.factor = 2
+        factor.mixed = True
+        factor.fixed_amount = 100
         value = factor.get_amount(distance_real=100)
         self.assertEqual(
             value, 300, 'Error in factor calculation (distance_real)')
@@ -132,7 +104,7 @@ class TestTmsFactor(TransactionCase):
             'category': 'driver',
             'factor_type': 'weight',
             'factor': 2,
-            })
+        })
         value = factor.get_amount(weight=100)
         self.assertEqual(
             value, 200, 'Error in factor calculation (weight)')
@@ -145,7 +117,7 @@ class TestTmsFactor(TransactionCase):
             'range_start': 0,
             'range_end': 1000,
             'factor': 2,
-            })
+        })
         factor2 = self.factor.create({
             'name': 'weight',
             'category': 'driver',
@@ -153,12 +125,11 @@ class TestTmsFactor(TransactionCase):
             'range_start': 1001,
             'range_end': 2000,
             'factor': 1,
-            })
-        factors = self.factor.browse([factor.id, factor2.id])
-        value = factors.get_amount(weight=100)
+        })
+        value = factor.get_amount(weight=100)
         self.assertEqual(
             value, 200, 'Error in factor calculation (weight)')
-        value = factors.get_amount(weight=1500)
+        value = factor2.get_amount(weight=1500)
         self.assertEqual(
             value, 1500, 'Error in factor calculation (weight)')
 
@@ -170,7 +141,7 @@ class TestTmsFactor(TransactionCase):
             'factor': 2,
             'mixed': True,
             'fixed_amount': 100,
-            })
+        })
         value = factor.get_amount(weight=100)
         self.assertEqual(
             value, 300, 'Error in factor calculation (weight)')
@@ -181,7 +152,7 @@ class TestTmsFactor(TransactionCase):
             'category': 'driver',
             'factor_type': 'travel',
             'fixed_amount': 100,
-            })
+        })
         value = factor.get_amount()
         self.assertEqual(
             value, 100, 'Error in factor calculation (travel)')
@@ -192,7 +163,7 @@ class TestTmsFactor(TransactionCase):
             'category': 'driver',
             'factor_type': 'qty',
             'factor': 2,
-            })
+        })
         value = factor.get_amount(qty=100)
         self.assertEqual(
             value, 200, 'Error in factor calculation (qty)')
@@ -205,7 +176,7 @@ class TestTmsFactor(TransactionCase):
             'range_start': 0,
             'range_end': 1000,
             'factor': 2,
-            })
+        })
         factor2 = self.factor.create({
             'name': 'qty',
             'category': 'driver',
@@ -213,12 +184,11 @@ class TestTmsFactor(TransactionCase):
             'range_start': 1001,
             'range_end': 2000,
             'factor': 1,
-            })
-        factors = self.factor.browse([factor.id, factor2.id])
-        value = factors.get_amount(qty=100)
+        })
+        value = factor.get_amount(qty=100)
         self.assertEqual(
             value, 200, 'Error in factor calculation (qty)')
-        value = factors.get_amount(qty=1500)
+        value = factor2.get_amount(qty=1500)
         self.assertEqual(
             value, 1500, 'Error in factor calculation (qty)')
 
@@ -230,7 +200,7 @@ class TestTmsFactor(TransactionCase):
             'factor': 2,
             'mixed': True,
             'fixed_amount': 100,
-            })
+        })
         value = factor.get_amount(qty=100)
         self.assertEqual(
             value, 300, 'Error in factor calculation (qty)')
@@ -241,7 +211,7 @@ class TestTmsFactor(TransactionCase):
             'category': 'driver',
             'factor_type': 'volume',
             'factor': 2,
-            })
+        })
         value = factor.get_amount(volume=100)
         self.assertEqual(
             value, 200, 'Error in factor calculation (volume)')
@@ -254,7 +224,7 @@ class TestTmsFactor(TransactionCase):
             'range_start': 0,
             'range_end': 1000,
             'factor': 2,
-            })
+        })
         factor2 = self.factor.create({
             'name': 'volume',
             'category': 'driver',
@@ -262,12 +232,11 @@ class TestTmsFactor(TransactionCase):
             'range_start': 1001,
             'range_end': 2000,
             'factor': 1,
-            })
-        factors = self.factor.browse([factor.id, factor2.id])
-        value = factors.get_amount(volume=100)
+        })
+        value = factor.get_amount(volume=100)
         self.assertEqual(
             value, 200, 'Error in factor calculation (volume)')
-        value = factors.get_amount(volume=1500)
+        value = factor2.get_amount(volume=1500)
         self.assertEqual(
             value, 1500, 'Error in factor calculation (volume)')
 
@@ -279,7 +248,7 @@ class TestTmsFactor(TransactionCase):
             'factor': 2,
             'mixed': True,
             'fixed_amount': 100,
-            })
+        })
         value = factor.get_amount(volume=100)
         self.assertEqual(
             value, 300, 'Error in factor calculation (volume)')
@@ -290,7 +259,7 @@ class TestTmsFactor(TransactionCase):
             'category': 'driver',
             'factor_type': 'percent',
             'factor': 10,
-            })
+        })
         value = factor.get_amount(income=1000)
         self.assertEqual(
             value, 100, 'Error in factor calculation (percent)')
@@ -303,7 +272,40 @@ class TestTmsFactor(TransactionCase):
             'factor': 10,
             'mixed': True,
             'fixed_amount': 100,
-            })
+        })
         value = factor.get_amount(income=1000)
         self.assertEqual(
             value, 200, 'Error in factor calculation (percent)')
+
+    def test_90_get_driver_amount(self):
+        factor = self.create_factor()
+        with self.assertRaisesRegexp(
+                ValidationError,
+                'The employee must have a income percentage value'):
+            factor.get_driver_amount(self.employee, 500, 100)
+        self.employee.income_percentage = 500
+        amount = factor.get_driver_amount(self.employee, 500, 100)
+        self.assertEqual(amount, 2600, 'Error in amount')
+        with self.assertRaisesRegexp(
+                ValidationError,
+                'Invalid parameter you can use this factor only with drivers'):
+            factor.get_driver_amount(False, 500, 100)
+
+    def test_100_get_amount(self):
+        factor = self.create_factor()
+        factor.factor_type = 'percent_driver'
+        self.employee.income_percentage = 500
+        percent = factor.get_amount(
+            employee=self.employee, income=100)
+        self.assertEqual(percent, 500.0, 'Error in amount')
+        factor.factor_type = 'amount_driver'
+        factor.fixed_amount = 100.0
+        amount = factor.get_amount(
+            employee=self.employee)
+        self.assertEqual(amount, 500.0, 'Error in amount')
+        with self.assertRaisesRegexp(
+                ValidationError,
+                'the amount isnt between of any ranges'):
+            factor.fixed_amount = 0.0
+            factor.factor_type = 'distance'
+            factor.get_amount(employee=self.employee)

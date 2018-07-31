@@ -14,6 +14,7 @@
                     <field name="advance_sequence_id" required="1"/>
                     <field name="fuel_log_sequence_id" required="1"/>
                     <field name="loan_sequence_id" required="1"/>
+                    <field name="prepaid_fuel_sequence_id" required="1"/>
                 </group>
                 <group string="Journals for TMS">
                     <field name="advance_journal_id" required="1"/>

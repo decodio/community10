@@ -5,7 +5,7 @@
 
 import base64
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import pytz
 from odoo import _, api, fields, models
@@ -47,10 +47,12 @@ class TmsTollImport(models.TransientModel):
                     except ValueError:
                         create_date = datetime.strptime(
                             toll_datetime, "%d/%m/%Y %H:%M:%S")
-                    txt_date = create_date + timedelta(hours=7)
-                    create_date = create_date.replace(tzinfo=pytz.utc)
+                    local_tz = pytz.timezone(self._context['tz'])
+                    datetime_with_tz = local_tz.localize(
+                        create_date, is_dst=None)
+                    txt_date = fields.Datetime.to_string(
+                        datetime_with_tz.astimezone(pytz.utc))
                     num_tag = split_line[0].replace('.', '')
-                    txt_date = txt_date.strftime('%Y-%m-%d %H:%M:%S')
                     amount_total = (
                         split_line[5].replace('$', '').replace(' ', ''))
                     exists = self.env['tms.toll.data'].search([
@@ -64,14 +66,6 @@ class TmsTollImport(models.TransientModel):
                             'date': txt_date,
                             'import_rate': amount_total,
                             })
-                return {
-                    'name': 'Toll station data',
-                    'view_type': 'form',
-                    'view_mode': 'tree',
-                    'target': 'current',
-                    'res_model': 'tms.toll.data',
-                    'type': 'ir.actions.act_window'
-                }
             except Exception as message:
                 raise ValidationError(_(
                     'Oops! Odoo has detected an error'
@@ -80,3 +74,11 @@ class TmsTollImport(models.TransientModel):
         else:
             raise ValidationError(
                 _('Oops! The files must have .txt or .dat extensions'))
+        return {
+            'name': 'Toll station data',
+            'view_type': 'form',
+            'view_mode': 'tree',
+            'target': 'current',
+            'res_model': 'tms.toll.data',
+            'type': 'ir.actions.act_window',
+        }

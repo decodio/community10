@@ -25,8 +25,7 @@ class TmsWaybillLine(models.Model):
     product_id = fields.Many2one(
         'product.product',
         string='Product',
-        required=True,
-        domain=[('sale_ok', '=', True)])
+        required=True)
     unit_price = fields.Float(
         default=0.0)
     price_subtotal = fields.Float(

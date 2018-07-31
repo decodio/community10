@@ -80,13 +80,25 @@ odoo.define('web_digital_sign.web_digital_sign', function(require) {
                     $img.attr('src', self.placeholder);
                     self.do_warn(_t("Image"), _t("Could not display the selected image."));
                 });
+                if(this.field.__attrs.readonly == true){
+                	this.$el.find(".digital_pennal").css({'display':'none'})
+                }
+                else if(this.field.readonly == true){
+                	this.$el.find(".digital_pennal").css({'display':'none'})
+                }
             } else if (this.view.get("actual_mode") === 'edit') {
                 this.$el.find('> img').remove();
                 if (this.get('value')) {
                     var field_name = this.options.preview_image
                         ? this.options.preview_image
                                 : this.name;
-                    new Model(this.view.dataset.model).call("read", [this.view.datarecord.id, [field_name]]).done(function(data) {
+                    var res_id = this.view.datarecord.id
+                    if (typeof(res_id)=='string')
+                        {
+                            res_id = res_id.slice(14)
+                        }
+                        var res_int = parseInt(res_id,0)
+                    new Model(this.view.dataset.model).call("read", [res_int, [field_name]]).done(function(data) {
                         if (data) {
                             var field_desc = _.values(_.pick(data[0], field_name));
                             self.$el.find(".signature").jSignature("reset");

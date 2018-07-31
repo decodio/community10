@@ -38,27 +38,27 @@
                         <field class="oe_inline" name="name" readonly="1"/>
                     </h1>
                     <group col="4">
-                        <field attrs="{'readonly':[('state','in',('confirmed'))]}" name="operating_unit_id"/>
-                        <field attrs="{'readonly':[('state','in',('confirmed'))]}" name="date_order"/>
-                        <field attrs="{'readonly':[('state','in',('confirmed'))]}" groups="base.group_multi_currency" name="currency_id"/>
+                        <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" name="operating_unit_id"/>
+                        <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" name="date_order"/>
+                        <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" groups="base.group_multi_currency" name="currency_id"/>
                         <separator colspan="4" string="·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·" style="text-align: center;"/>
-                        <field attrs="{'readonly':[('state','in',('confirmed'))]}" colspan="4" domain="[('customer','=',True), ('is_company', '=', True)]" name="partner_id"/>
-                        <field attrs="{'readonly':[('state','in',('confirmed'))]}" context="{'search_default_customer':1, 'show_address': 1}" domain="[('parent_id','=',partner_id)]" name="partner_order_id" options="{&quot;always_reload&quot;: True}"/>
-                        <field attrs="{'readonly':[('state','in',('confirmed'))]}" context="{'search_default_customer':1, 'show_address': 1}" domain="[('parent_id','=',partner_id)]" name="partner_invoice_id" options="{&quot;always_reload&quot;: True}"/>
-                        <field attrs="{'readonly':[('state','in',('confirmed'))]}" context="{'search_default_customer':1, 'show_address': 1}" name="departure_address_id" options="{&quot;always_reload&quot;: True}"/>
-                        <field attrs="{'readonly':[('state','in',('confirmed'))]}" context="{'search_default_customer':1, 'show_address': 1}" name="arrival_address_id" options="{&quot;always_reload&quot;: True}"/>
-                        <field attrs="{'readonly':[('state','in',('confirmed'))]}" name="upload_point"/>
-                        <field attrs="{'readonly':[('state','in',('confirmed'))]}" name="download_point"/>
+                        <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" colspan="4" domain="[('customer','=',True), ('is_company', '=', True)]" name="partner_id"/>
+                        <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" context="{'search_default_customer':1, 'show_address': 1}" domain="[('parent_id','=',partner_id)]" name="partner_order_id" options="{&quot;always_reload&quot;: True}"/>
+                        <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" context="{'search_default_customer':1, 'show_address': 1}" domain="[('parent_id','=',partner_id)]" name="partner_invoice_id" options="{&quot;always_reload&quot;: True}"/>
+                        <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" context="{'search_default_customer':1, 'show_address': 1}" name="departure_address_id" options="{&quot;always_reload&quot;: True}"/>
+                        <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" context="{'search_default_customer':1, 'show_address': 1}" name="arrival_address_id" options="{&quot;always_reload&quot;: True}"/>
+                        <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" name="upload_point"/>
+                        <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" name="download_point"/>
                     </group>
                     <notebook colspan="4">
                         <page string="Lines">
                             <group>
                                 <separator coslpan="4" string="Travels"/>
-                                <field attrs="{'readonly':[('state','in',('confirmed'))]}" colspan="4" domain="[('state','not in',('cancel','closed')),('operating_unit_id', '=', operating_unit_id)]" name="travel_ids" nolabel="1"/>
+                                <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" colspan="4" domain="[('state','not in',('cancel','closed')),('operating_unit_id', '=', operating_unit_id)]" name="travel_ids" nolabel="1"/>
                                 <separator coslpan="4" string="Waybill Factor Client"/>
-                                <field attrs="{'readonly':[('state','in',('confirmed'))]}" colspan="4" context="{'default_category': 'customer'}" name="customer_factor_ids" nolabel="1"/>
+                                <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" colspan="4" context="{'default_category': 'customer'}" name="customer_factor_ids" nolabel="1"/>
                                 <separator coslpan="4" string="Transportable"/>
-                                <field attrs="{'readonly':[('state','in',('confirmed'))]}" colspan="4" name="transportable_line_ids" nolabel="1">
+                                <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" colspan="4" name="transportable_line_ids" nolabel="1">
                                     <tree editable="bottom">
                                         <field name="transportable_id"/>
                                         <field name="name"/>
@@ -68,7 +68,7 @@
                                     </tree>
                                 </field>
                                 <separator colspan="4" string="Waybill Lines"/>
-                                <field attrs="{'readonly':[('state','in',('confirmed'))]}" colspan="4" name="waybill_line_ids" nolabel="1">
+                                <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" colspan="4" name="waybill_line_ids" nolabel="1">
                                     <tree editable="bottom" string="Waybill Lines">
                                         <field name="product_id" domain="[('tms_product_category', 'in', ('freight', 'move', 'insurance', 'tolls', 'other'))]"/>
                                         <field name="name"/>
@@ -82,7 +82,7 @@
                                 </field>
                                 <group col="4" colspan="4">
                                     <group colspan="2">
-                                        <field attrs="{'readonly':[('state','in',('confirmed'))]}" name="tax_line_ids" nolabel="1">
+                                        <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" name="tax_line_ids" nolabel="1">
                                             <tree create="false" delete="false">
                                                 <field name="tax_id"/>
                                                 <field name="base"/>
@@ -112,7 +112,7 @@
                         <page string="Extra Fields">
                             <group col="4" colspan="4">
                                 <newline/>
-                                <field colspan="4" context="{'default_waybill_id': active_id, 'active_model_base': active_model}" name="waybill_extradata" nolabel="1">
+                                <field colspan="4" context="{'default_waybill_id': active_id, 'active_model_base': active_model}" name="waybill_extradata_ids" nolabel="1">
                                     <tree string="Extra Fields">
                                         <field name="type_id" string="Name"/>
                                         <field name="value_extra" string="Value"/>
@@ -122,44 +122,44 @@
                         </page>
                         <page string="Factor Supplier">
                             <separator colspan="4" string="Waybill Supplier Factors"/>
-                            <field attrs="{'readonly':[('state','in',('confirmed'))]}" colspan="4" context="{'default_category': 'supplier'}" name="supplier_factor_ids" nolabel="1"/>
+                            <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" colspan="4" context="{'default_category': 'supplier'}" name="supplier_factor_ids" nolabel="1"/>
                         </page>
                         <page string="Factor Driver">
                             <separator colspan="4" string="Driver Salary Factors"/>
-                            <field attrs="{'readonly':[('state','in',('confirmed'))]}" colspan="4" context="{'default_category': 'driver'}" name="driver_factor_ids" nolabel="1"/>
+                            <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" colspan="4" context="{'default_category': 'driver'}" name="driver_factor_ids" nolabel="1"/>
                         </page>
                         <page string="Times">
                             <group col="4" colspan="4">
                                 <group colspan="2">
                                     <separator string="Scheduled"/>
                                     <newline/>
-                                    <field attrs="{'readonly':[('state','in',('confirmed'))]}" name="date_start"/>
-                                    <field attrs="{'readonly':[('state','in',('confirmed'))]}" name="date_up_start_sched"/>
-                                    <field attrs="{'readonly':[('state','in',('confirmed'))]}" name="date_up_end_sched"/>
-                                    <field attrs="{'readonly':[('state','in',('confirmed'))]}" name="date_up_docs_sched"/>
-                                    <field attrs="{'readonly':[('state','in',('confirmed'))]}" name="date_appoint_down_sched"/>
-                                    <field attrs="{'readonly':[('state','in',('confirmed'))]}" name="date_down_start_sched"/>
-                                    <field attrs="{'readonly':[('state','in',('confirmed'))]}" name="date_down_end_sched"/>
-                                    <field attrs="{'readonly':[('state','in',('confirmed'))]}" name="date_down_docs_sched"/>
+                                    <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" name="date_start"/>
+                                    <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" name="date_up_start_sched"/>
+                                    <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" name="date_up_end_sched"/>
+                                    <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" name="date_up_docs_sched"/>
+                                    <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" name="date_appoint_down_sched"/>
+                                    <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" name="date_down_start_sched"/>
+                                    <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" name="date_down_end_sched"/>
+                                    <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" name="date_down_docs_sched"/>
                                     <field name="date_end"/>
                                 </group>
                                 <group colspan="2">
                                     <separator string="Real"/>
                                     <newline/>
-                                    <field attrs="{'readonly':[('state','in',('confirmed'))]}" name="date_start_real"/>
-                                    <field attrs="{'readonly':[('state','in',('confirmed'))]}" name="date_up_start_real"/>
-                                    <field attrs="{'readonly':[('state','in',('confirmed'))]}" name="date_up_end_real"/>
-                                    <field attrs="{'readonly':[('state','in',('confirmed'))]}" name="date_up_docs_real"/>
-                                    <field attrs="{'readonly':[('state','in',('confirmed'))]}" name="date_appoint_down_real"/>
-                                    <field attrs="{'readonly':[('state','in',('confirmed'))]}" name="date_down_start_real"/>
-                                    <field attrs="{'readonly':[('state','in',('confirmed'))]}" name="date_down_end_real"/>
-                                    <field attrs="{'readonly':[('state','in',('confirmed'))]}" name="date_down_docs_real"/>
-                                    <field attrs="{'readonly':[('state','in',('confirmed'))]}" name="date_end_real"/>
+                                    <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" name="date_start_real"/>
+                                    <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" name="date_up_start_real"/>
+                                    <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" name="date_up_end_real"/>
+                                    <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" name="date_up_docs_real"/>
+                                    <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" name="date_appoint_down_real"/>
+                                    <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" name="date_down_start_real"/>
+                                    <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" name="date_down_end_real"/>
+                                    <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" name="date_down_docs_real"/>
+                                    <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" name="date_end_real"/>
                                 </group>
                             </group>
                         </page>
                         <page string="Notes">
-                            <field attrs="{'readonly':[('state','in',('confirmed'))]}" colspan="4" name="notes" nolabel="1" placeholder="Notes..."/>
+                            <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" colspan="4" name="notes" nolabel="1" placeholder="Notes..."/>
                         </page>
                         <page string="Log">
                             <group col="4" colspan="4">
@@ -177,17 +177,12 @@
                                 </group>
                             </group>
                         </page>
-                        <page string="Expenses" 
-                            attrs="{'invisible':[('expense_ids','=', [(6, False, [])])]}">
-                            <field colspan="4" name="expense_ids" nolabel="1">
-                                <tree>
-                                    <field name="name"/>
-                                    <field name="date"/>
-                                    <field name="employee_id"/>
-                                    <field name="unit_id"/>
-                                    <field name="state"/>
-                                </tree>
-                            </field>
+                        <page string="Customs">
+                            <separator coslpan="4" string="Customs"/>
+                            <field name="custom_ids" nolabel="1"/>
+                        </page>
+                        <page string="Expenses">
+                            <field name="expense_ids"/>
                         </page>
                     </notebook>
                 </sheet>

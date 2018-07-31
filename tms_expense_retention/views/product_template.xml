@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="tms.tms_product_template_view"/>
         <field name="arch" type="xml">
             <field name="apply_for_salary" position="after">
-                <field name="apply_for_retention" groups="base.group_no_one" attrs="{'invisible': ['|', ('tms_product_category', 'in', ('freight', 'move', 'insurance', 'tolls', 'other', 'real_expense', 'made_up_expense', 'salary_retention', 'fuel', 'refund', 'negative_balance', 'fuel_cash')), ('tms_product_category', '=', False)]}"/>
+                <field name="apply_for_retention" groups="base.group_no_one" attrs="{'invisible': ['|', ('tms_product_category', '!=', 'salary_retention'), ('tms_product_category', '=', False)]}"/>
             </field>
         </field>
     </record>

@@ -34,8 +34,7 @@ class ProductTemplate(models.Model):
     def unique_product_per_category(self):
         for rec in self:
             categorys = [
-                ['freight', 'Freight (Waybill)'],
-                ['move', 'Moves (Waybill)'],
+                ['move', 'Moves'],
                 ['salary', 'Salary'],
                 ['negative_balance', 'Negative Balance'],
                 ['indirect_expense', 'Indirect Expense']

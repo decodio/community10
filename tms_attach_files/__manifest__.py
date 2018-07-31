@@ -8,7 +8,7 @@
     'author': 'Jarsa Sistemas',
     'website': 'https://www.jarsa.com.mx',
     'category': 'Transport',
-    'version': '10.0.0.2.0',
+    'version': '10.0.0.3.0',
     "license": "AGPL-3",
     'depends': ['tms'],
     'data': [

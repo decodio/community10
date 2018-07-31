@@ -57,25 +57,47 @@ class FleetVehicleLogFuel(models.Model):
         ('cancel', 'Cancelled')],
         readonly=True,
         default='draft')
-    no_travel = fields.Boolean(
-        help="Check this if you want to create Fuel Voucher "
-        "with no Travel.")
-    vendor_id = fields.Many2one('res.partner')
+    vendor_id = fields.Many2one('res.partner', required=True,)
     product_id = fields.Many2one(
         'product.product',
         string='Product',
         domain=[('tms_product_category', '=', 'fuel')])
     currency_id = fields.Many2one(
         'res.currency', string='Currency',
+        required=True,
         default=lambda self: self.env.user.company_id.currency_id)
-    expense_control = fields.Boolean(readonly=True)
     ticket_number = fields.Char()
+    prepaid_id = fields.Many2one(
+        'fleet.vehicle.log.fuel.prepaid',
+        string='Prepaid',
+        compute="_compute_prepaid"
+    )
+    created_from_expense = fields.Boolean(readonly=True)
+    expense_line_id = fields.Many2one('tms.expense.line', readonly=True)
+    company_id = fields.Many2one(
+        'res.company', string='Company', required=True,
+        default=lambda self: self.env.user.company_id)
+
+    @api.depends('vendor_id')
+    def _compute_prepaid(self):
+        for rec in self:
+            obj_prepaid = self.env['fleet.vehicle.log.fuel.prepaid']
+            prepaid_id = obj_prepaid.search([
+                ('operating_unit_id', '=', rec.operating_unit_id.id),
+                ('vendor_id', '=', rec.vendor_id.id),
+                ('state', '=', 'confirmed')], limit=1, order="date")
+            if prepaid_id:
+                if prepaid_id.balance > rec.price_total:
+                    rec.prepaid_id = prepaid_id.id
+                else:
+                    raise ValidationError(
+                        _('Insufficient amount'))
 
     @api.multi
     @api.depends('vehicle_id')
     def _compute_employee_id(self):
         for rec in self:
-            rec.employee_id = rec.vehicle_id.employee_id.id
+            rec.employee_id = rec.travel_id.employee_id
 
     @api.multi
     @api.depends('tax_amount')
@@ -92,6 +114,7 @@ class FleetVehicleLogFuel(models.Model):
             rec.price_unit = 0
             if rec.product_qty and rec.price_subtotal > 0:
                 rec.price_unit = rec.price_subtotal / rec.product_qty
+            return rec.price_unit
 
     @api.multi
     @api.depends('price_subtotal', 'tax_amount', 'price_total')
@@ -113,14 +136,14 @@ class FleetVehicleLogFuel(models.Model):
         for rec in self:
             if rec.invoice_id:
                 raise ValidationError(
-                    _('Could not cancel Fuel Voucher !'),
-                    _('This Fuel Voucher is already Invoiced'))
+                    _('Could not cancel Fuel Voucher! This '
+                      'Fuel Voucher is already Invoiced'))
             elif (rec.travel_id and
                   rec.travel_id.state == 'closed'):
                 raise ValidationError(
-                    _('Could not cancel Fuel Voucher !'
-                        'This Fuel Voucher is already linked to Travel '
-                        'Expenses record'))
+                    _('Could not cancel Fuel Voucher! This Fuel '
+                      'Voucher is already linked to a Travel Expense'))
+            rec.state = 'cancel'
 
     @api.model
     def create(self, values):
@@ -163,12 +186,6 @@ class FleetVehicleLogFuel(models.Model):
             rec.invoice_paid = (
                 rec.invoice_id.id and
                 rec.invoice_id.state == 'paid')
-
-    @api.onchange('no_travel')
-    def _onchange_no_travel(self):
-        if self.no_travel:
-            self.travel_id = False
-            self.vehicle_id = False
 
     @api.multi
     def _amount_to_text(self, product_qty):

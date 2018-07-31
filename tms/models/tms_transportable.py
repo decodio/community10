@@ -24,7 +24,7 @@ class TmsTransportable(models.Model):
             new_name = u"Copy of [%(values)s]" % dict(values=self.name)
         else:
             new_name = u"Copy of [%(values)s]" % dict(
-                values=", ".join(self.name, copied_count))
+                values=", ".join([self.name, str(copied_count)]))
 
         default['name'] = new_name
         return super(TmsTransportable, self).copy(default)

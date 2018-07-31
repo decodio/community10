@@ -313,7 +313,6 @@
         <field name="arch" type="xml">
             <gantt color="unit_id" date_start="date_start" date_stop="date_end" default_group_by="unit_id" duration_unit="week" type="consolidate" consolidation="travel_duration" consolidation_label="hours" string="Travels">
                 <field name="name"/>
-                <!-- <field name="distance_route"/> -->
             </gantt>
         </field>
     </record>

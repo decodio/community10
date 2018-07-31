@@ -23,11 +23,11 @@ class HrEmployee(models.Model):
     driver = fields.Boolean(
         help='Used to define if this person will be used as a Driver')
     tms_advance_account_id = fields.Many2one(
-        'account.account', 'Advance Account')
+        'account.account', 'Advance Account', company_dependent=True)
     tms_loan_account_id = fields.Many2one(
-        'account.account', 'Loan Account')
+        'account.account', 'Loan Account', company_dependent=True)
     tms_expense_negative_account_id = fields.Many2one(
-        'account.account', 'Negative Balance Account')
+        'account.account', 'Negative Balance Account', company_dependent=True)
     operating_unit_id = fields.Many2one(
         'operating.unit', 'Operating Unit')
     driver_license = fields.Char(string="License ID")
@@ -41,10 +41,9 @@ class HrEmployee(models.Model):
     @api.depends('license_expiration')
     def _compute_days_to_expire(self):
         for rec in self:
+            date = datetime.now()
             if rec.license_expiration:
                 date = datetime.strptime(rec.license_expiration, '%Y-%m-%d')
-            else:
-                date = datetime.now()
             now = datetime.now()
             delta = date - now
             rec.days_to_expire = delta.days if delta.days > 0 else 0
@@ -62,12 +61,14 @@ class HrEmployee(models.Model):
                 license_expiration = datetime.strptime(
                     driver_license[0]['fecha_fin_vigencia'],
                     '%Y-%m-%dT%H:%M:%S.%f')
-                rec.license_type = driver_license[0][
-                    'categoria_de_la_licencia']
-                rec.license_valid_from = license_valid_from
-                rec.license_expiration = license_expiration
+                rec.write({
+                    'license_type': driver_license[0][
+                        'categoria_de_la_licencia'],
+                    'license_valid_from': license_valid_from,
+                    'license_expiration': license_expiration,
+                })
                 client.close()
-            except:
+            except Exception:
                 client.close()
                 raise ValidationError(_(
                     'The driver license is not in SCT database'))

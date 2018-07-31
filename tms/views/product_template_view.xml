@@ -3,14 +3,14 @@
     <record id="tms_product_template_view" model="ir.ui.view">
         <field name="name">tms.product.template.view</field>
         <field name="model">product.template</field>
-        <field name="inherit_id" ref="sale.product_template_form_view_invoice_policy"/>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
         <field name="arch" type="xml">
-            <field name="invoice_policy" position="after">
-                <group colspan="4" string="">
+            <xpath expr="//group[@name='group_standard_price']" position="after">
+                <group>
                     <field name="tms_product_category" groups="base.group_no_one"/>
                     <field name="apply_for_salary" groups="base.group_no_one" attrs="{'invisible': ['|', ('tms_product_category', 'in', ('real_expense', 'made_up_expense', 'salary', 'salary_retention', 'salary_discount', 'fuel', 'indirect_expense', 'other_income', 'refund', 'negative_balance', 'fuel_cash')), ('tms_product_category', '=', False)]}"/>
                 </group>
-            </field>
+            </xpath>
         </field>
     </record>
     <record id="tms_open_view_product_list" model="ir.actions.act_window">
