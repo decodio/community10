@@ -205,7 +205,7 @@ odoo.define('web_groupby_expand.web_groupby_expand', function(require) {
             if (self.groups.datagroup.dataset) {
                 oe_list_expand.addClass("hidden");
             }
-            if (self.groups.datagroup.group_by === "" || self.groups.datagroup.group_by.length === 0) {
+            if (self.groups.datagroup.group_by === "" || (self.groups.datagroup.group_by && self.groups.datagroup.group_by.length === 0)) {
                 oe_list_expand.addClass("hidden");
             } else if (typeof self.groups.datagroup.group_by === "undefined") {
                 oe_list_expand.addClass("hidden");
