@@ -1,0 +1,27 @@
+.o_form_view {
+    position: relative;
+}
+.o_form_view > header {
+    top:0;
+    left: 0;
+    position: sticky;
+    z-index: 9;
+}
+
+input.o_list_number::-webkit-outer-spin-button,
+input.o_list_number::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+input.o_list_number[type=number] {
+    -moz-appearance:textfield; /* Firefox */
+}
+
+.o_web_client > .o_main .o_main_content .o_content {
+    overflow: scroll !important;
+}
+.table-responsive {
+    overflow: inherit;
+}

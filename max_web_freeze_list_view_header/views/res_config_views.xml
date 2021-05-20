@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data>
+        <record id="web_freeze_view_general_configuration" model="ir.ui.view">
+            <field name="name">web_freeze_view_general_configuration</field>
+            <field name="model">base.config.settings</field>
+            <field name="inherit_id" ref="base_setup.view_general_configuration"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[1]" position="inside">
+                    <label for="use_freeze_on_forms"/>
+                    <div>
+                        <field name="use_freeze_on_forms" />
+                    </div>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

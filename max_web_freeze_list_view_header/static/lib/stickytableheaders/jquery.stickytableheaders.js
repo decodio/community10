@@ -50,11 +50,12 @@
 			base.$el.each(function () {
 				var $this = $(this);
 
-				// remove padding on <table> to fix issue #7
+				//remove padding on <table> to fix issue #7
 				$this.css('padding', 0);
 
 				base.$originalHeader = $('thead:first', this);
 				base.$clonedHeader = base.$originalHeader.clone();
+
 				$this.trigger('clonedHeader.' + name, [base.$clonedHeader]);
 
 				base.$clonedHeader.addClass('tableFloatingHeader');
@@ -70,7 +71,6 @@
 					'</style>');
 				base.$head.append(base.$printStyle);
 			});
-
 			base.updateWidth();
 			base.toggleHeaders();
 			base.bind();
@@ -154,12 +154,17 @@
 							(offset.top + $this.height() - headerHeight - (base.isWindowScrolling ? 0 : newTopOffset));
 
 					if (scrolledPastTop && notScrolledPastBottom) {
-						newLeft = offset.left - scrollLeft + base.options.leftOffset;
+					    //CHANGED! horizontal scroll bug
+						//newLeft = offset.left - scrollLeft + base.options.leftOffset;
+						newLeft = offset.left;
+						if ($('.modal').hasClass('in')) {
+						    newLeft = 0;
+						}
 						base.$originalHeader.css({
 							'position': 'fixed',
 							'margin-top': base.options.marginTop,
 							'left': newLeft,
-							'z-index': 3 // #18: opacity bug
+							'z-index': 9 // #18: opacity bug
 						});
 						base.leftOffset = newLeft;
 						base.topOffset = newTopOffset;
@@ -190,6 +195,11 @@
 					winScrollLeft < 0 || winScrollLeft + base.$window.width() > base.$document.width()) {
 				return;
 			}
+			/*var header = $('o_form_view header');
+			var hh = 0;
+			if (header[0]) {
+			    hh = header[0].height;
+			}*/
 			base.$originalHeader.css({
 				'top': base.topOffset - (base.isWindowScrolling ? 0 : winScrollTop),
 				'left': base.leftOffset - (base.isWindowScrolling ? 0 : winScrollLeft)
@@ -212,6 +222,7 @@
 
 			// Copy row width from whole table
 			base.$originalHeader.css('width', base.$clonedHeader.width());
+
 
 			// If we're caching the height, we need to update the cached value when the width changes
 			if (base.options.cacheHeaderHeight) {
@@ -251,6 +262,7 @@
 
 				widths[index] = width;
 			});
+
 			return widths;
 		};
 
@@ -309,6 +321,7 @@
 				}
 			} else if(options !== 'destroy') {
 				$.data(this, 'plugin_' + name, new Plugin( this, options ));
+
 			}
 		});
 	};

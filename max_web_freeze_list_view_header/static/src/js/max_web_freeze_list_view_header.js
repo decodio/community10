@@ -2,6 +2,7 @@ odoo.define('max_web_freeze_list_View_header', function (require) {
 'use strict';
 
     var ListView = require('web.ListView');
+    var Model = require('web.Model');
 
     ListView.include({
         load_list: function () {
@@ -15,9 +16,27 @@ odoo.define('max_web_freeze_list_View_header', function (require) {
                     });
                 }
 
+                function do_freeze_form() {
+                    self.$el.find('table.o_list_view').each(function () {
+                        var header = $('.o_form_view > header');
+                        var offset = header.outerHeight( true );
+                        $(this).stickyTableHeaders({scrollableArea: scrollArea, fixedOffset: offset});
+                    });
+                }
+
                 if (form_field_length == 0) {
                     do_freeze();
                     $(window).unbind('resize', do_freeze).bind('resize', do_freeze);
+                } else {
+                    var config_param = new Model('base.config.settings');
+                    config_param.call(
+                        'get_use_freeze_on_forms', ['use_freeze_on_forms']).then(
+                        function(use_freeze_on_forms) {
+                            if (use_freeze_on_forms) {
+                                do_freeze_form();
+                                $(window).unbind('resize', do_freeze_form).bind('resize', do_freeze_form);
+                            }
+                        });
                 }
             });
         },

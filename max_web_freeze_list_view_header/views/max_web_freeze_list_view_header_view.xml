@@ -7,5 +7,12 @@
                 <script type="text/javascript" src="/max_web_freeze_list_view_header/static/src/js/max_web_freeze_list_view_header.js"></script>
             </xpath>
         </template>
+
+        <template id="freeze_web_css" inherit_id="web.assets_backend">
+			<xpath expr="." position="inside">
+				<link rel="stylesheet" type="text/less"
+				href="/max_web_freeze_list_view_header/static/src/less/freeze.less"></link>
+			</xpath>
+		</template>
     </data>
 </odoo>
